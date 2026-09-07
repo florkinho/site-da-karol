@@ -186,6 +186,9 @@
 
   footer{text-align:center; padding:5vh 6vw; font-size:0.68rem; letter-spacing:0.12em; text-transform:uppercase; color:rgba(236,224,196,0.3);}
 </style>
+<link rel="stylesheet" href="transitions.css">
+<script src="transitions.js" defer></script>
+<link rel="stylesheet" href="rpg-world.css">
 </head>
 <body>
 
@@ -231,7 +234,7 @@
     </div>
 
     <div class="panel-view active" id="panel-historia">
-      <div class="node-panel" id="node-panel"></div>
+      <div id="rpg-world-host"></div><div class="node-panel" id="node-panel"></div>
     </div>
     <div class="panel-view" id="panel-mapa">
       <div class="map-panel"><div class="map-path" id="map-path"></div></div>
@@ -946,7 +949,7 @@ function newState(){
   };
 }
 function saveState(){ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }
-function loadState(){ const raw = localStorage.getItem(SAVE_KEY); return raw ? JSON.parse(raw) : null; }
+function loadState(){ try { const raw = JSON.parse(localStorage.getItem(SAVE_KEY)); return raw && STORY[raw.node] && raw.yudi && raw.karol ? raw : null; } catch { return null; } }
 function addItem(character, item){ character.inventory.push(item); }
 
 /* ================= TELA DE TÍTULO ================= */
@@ -954,6 +957,7 @@ const existing = loadState();
 if(existing){ document.getElementById('btn-continue').style.display = 'inline-block'; }
 
 document.getElementById('btn-new-game').addEventListener('click', () => {
+  if(loadState() && !confirm('Recomeçar a aventura e substituir o progresso salvo?')) return;
   state = newState();
   goToScreen('create');
   buildClassGrids();
@@ -1043,11 +1047,15 @@ function renderHud(){
 /* ================= RENDER NÓ DA HISTÓRIA ================= */
 function renderNode(){
   const node = STORY[state.node];
+  state.entered ||= {};
+  if(node.onEnter && !state.entered[state.node]){ node.onEnter(state); state.entered[state.node]=true; }
+  window.dispatchEvent(new CustomEvent('rpg-node',{detail:{node,id:state.node}}));
   if(node.loc && !state.visited.includes(node.loc)) state.visited.push(node.loc);
   saveState();
   renderHud();
 
   const panel = document.getElementById('node-panel');
+  panel.classList.remove('room-enter');void panel.offsetWidth;panel.classList.add('room-enter');
   let html = `<div class="node-tag">${node.tag}</div><div class="node-text">${node.text}</div>`;
 
   if(node.type === 'check'){
@@ -1075,7 +1083,7 @@ function renderNode(){
     return;
   }
 
-  if(node.onEnter) node.onEnter(state);
+
 
   if(node.type === 'end'){
     html += `<div style="text-align:center; margin-top:2rem;"><button class="rpg-btn ghost" id="btn-restart-adv">recomeçar a aventura</button></div>`;
@@ -1108,7 +1116,9 @@ function statBonusLabel(character, check){
 }
 
 /* ================= TESTE DE ATRIBUTO ================= */
+let checkRolling=false;
 function rollCheck(check, who){
+  if(checkRolling)return;checkRolling=true;
   document.getElementById('check-pick').style.display = 'none';
   const diceEl = document.getElementById('dice-face');
   const resultEl = document.getElementById('roll-result');
@@ -1135,6 +1145,7 @@ function rollCheck(check, who){
       const nome = who === 'yudi' ? 'Yudi' : 'Karol';
       resultEl.textContent = `${nome} rolou ${roll} + ${mod} de bônus${itemNote} = ${total} (precisava de ${check.dc}) — ${success ? 'sucesso!' : 'falhou.'}`;
       setTimeout(() => {
+        checkRolling=false;
         state.node = success ? check.success : check.fail;
         renderNode();
         renderMap();
@@ -1148,6 +1159,7 @@ function rollCheck(check, who){
 let combatState = null;
 
 function startCombat(cfg){
+  if(state.savedCombat?.node===state.node){combatState=state.savedCombat.data;renderCombat();if(combatState.ended){if(combatState.enemyHp<=0){setTimeout(()=>{state.node=cfg.win;renderAll()},500)}else showDefeatScreen()}else maybeAdvanceRound();return;}
   combatState = {
     cfg, enemyHp: cfg.enemyHp, enemyMaxHp: cfg.enemyHp,
     log:[`O combate contra ${cfg.enemyName} começou!`],
@@ -1169,6 +1181,7 @@ function heroClass(who){
 }
 
 function renderCombat(){
+  state.savedCombat={node:state.node,data:combatState};saveState();
   const box = document.getElementById('combat-box');
   const { cfg, enemyHp, enemyMaxHp, log } = combatState;
 
@@ -1184,6 +1197,7 @@ function renderCombat(){
     </div>
     <div class="combat-log" id="combat-log">${log.map(l => `<div>${l}</div>`).join('')}</div>
   `;
+  window.dispatchEvent(new CustomEvent('rpg-battle',{detail:{hp:combatState.enemyHp,name:combatState.cfg.enemyName}}));
   const logEl = document.getElementById('combat-log');
   logEl.scrollTop = logEl.scrollHeight;
 
@@ -1245,9 +1259,11 @@ function heroCombatCard(key, nome, character){
 }
 
 function useAbility(who, abilityId){
+  if(!['yudi','karol'].includes(who)||combatState.ended||combatState[who+'Acted']||combatState.downed[who]||combatState.dead[who])return;
   const character = state[who];
   const cls = heroClass(who);
   const ability = cls.abilities.find(a => a.id === abilityId);
+  if(!ability || !cls.abilities.slice(0,character.unlockedCount).includes(ability))return;
   const nome = who === 'yudi' ? 'Yudi' : 'Karol';
   const { cfg } = combatState;
 
@@ -1319,14 +1335,16 @@ function combatRevive(targetKey){
   maybeAdvanceRound();
 }
 
+let roundPending=false;
 function maybeAdvanceRound(){
   if(combatState.ended) return;
   const yudiOk = combatState.dead.yudi || combatState.downed.yudi || combatState.yudiActed;
   const karolOk = combatState.dead.karol || combatState.downed.karol || combatState.karolActed;
-  if(yudiOk && karolOk) setTimeout(resolveRound, 700);
+  if(yudiOk && karolOk && !roundPending){roundPending=true;setTimeout(()=>{roundPending=false;resolveRound()},700);}
 }
 
 function resolveRound(){
+  if(!combatState || combatState.ended)return;
   const { cfg } = combatState;
 
   // ataque do inimigo contra um vivo aleatório
@@ -1399,6 +1417,7 @@ function showDefeatScreen(){
     state.yudi.hp = state.yudi.maxHp;
     state.karol.hp = state.karol.maxHp;
     saveState();
+    delete state.savedCombat;
     startCombat(combatState.cfg);
   });
 }
@@ -1462,5 +1481,6 @@ function sheetCard(nome, icon, classId, character){
   `;
 }
 </script>
+<script src="rpg-world.js"></script><script src="rpg-cast.js"></script><script src="rpg-cast-view.js"></script>
 </body>
 </html>
