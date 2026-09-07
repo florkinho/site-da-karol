@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crônicas do Véu &mdash; RPG de Yudi & Karol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f0e17; --panel:#1b1826; --panel-2:#231f33; --panel-3:#2b2640;
+    --parchment:#ece0c4; --ink:#241c12;
+    --gold:#c9a344; --purple:#8a6bd1; --rose:#c9748c; --teal:#3f8a82; --red:#a63a3a; --blue:#3d5a9e;
+    --line:rgba(236,224,196,0.14);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:radial-gradient(ellipse at 50% 0%, #1c1730, var(--bg));
+    color:var(--parchment); font-family:'Jost',sans-serif; font-weight:300; min-height:100vh;
+  }
+  h1,h2,h3,.title-font{font-family:'Cinzel',serif; font-weight:600; letter-spacing:0.02em;}
+  .serif{font-family:'Cormorant Garamond',serif;}
+  button{font-family:inherit; cursor:pointer;}
+  a{color:inherit;}
+
+  .wrap{max-width:800px; margin:0 auto; padding:5vh 6vw 10vh;}
+  .top-bar{display:flex; justify-content:space-between; align-items:center; margin-bottom:1.6rem; flex-wrap:wrap; gap:0.8rem;}
+  .back-link{font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:rgba(236,224,196,0.5); border-bottom:1px solid var(--line); padding-bottom:2px;}
+  .back-link:hover{color:var(--rose);}
+
+  /* ---------- TITLE SCREEN ---------- */
+  #screen-title{text-align:center; padding-top:8vh;}
+  #screen-title .emblem{font-size:2.6rem; margin-bottom:1.2rem;}
+  #screen-title h1{font-size:clamp(2rem,7vw,3rem); margin-bottom:0.6rem;}
+  #screen-title .subtitle{font-size:0.95rem; color:var(--gold); letter-spacing:0.08em; margin-bottom:2.2rem;}
+  #screen-title p{max-width:52ch; margin:0 auto 2.4rem; color:rgba(236,224,196,0.7); font-size:0.92rem; line-height:1.7;}
+  .rpg-btn{
+    background:var(--gold); border:none; color:#241c12; padding:1rem 2.4rem; border-radius:4px;
+    font-family:'Cinzel',serif; font-size:0.85rem; letter-spacing:0.12em; text-transform:uppercase; font-weight:600;
+    box-shadow:0 16px 34px -14px rgba(0,0,0,0.7); transition:transform 0.2s ease, background 0.2s ease;
+  }
+  .rpg-btn:hover{transform:translateY(-2px); background:#ddbb58;}
+  .rpg-btn.ghost{background:none; border:1px solid var(--gold); color:var(--gold); box-shadow:none;}
+  .rpg-btn.ghost:hover{background:rgba(201,163,68,0.12);}
+  .rpg-btn:disabled{opacity:0.4; cursor:not-allowed; transform:none;}
+  .rpg-btn.small{padding:0.6rem 1.2rem; font-size:0.7rem;}
+  .title-actions{display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;}
+
+  /* ---------- CHARACTER CREATION ---------- */
+  #screen-create{display:none;}
+  .create-hero{margin-bottom:2.6rem;}
+  .create-hero h2{font-size:1.3rem; margin-bottom:0.3rem;}
+  .create-hero .hero-name{color:var(--gold);}
+  .class-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:0.9rem; margin-top:1rem;}
+  @media (max-width:600px){ .class-grid{grid-template-columns:1fr;} }
+  .class-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:1.2rem 1rem; text-align:center;
+    transition:border-color 0.2s ease, transform 0.2s ease;
+  }
+  .class-card:hover{transform:translateY(-3px);}
+  .class-card.selected{border-color:var(--gold); background:var(--panel-2); box-shadow:0 0 0 1px var(--gold);}
+  .class-card .cc-icon{font-size:1.8rem; margin-bottom:0.5rem;}
+  .class-card h4{font-family:'Cinzel',serif; font-size:0.9rem; margin-bottom:0.4rem;}
+  .class-card p{font-size:0.72rem; color:rgba(236,224,196,0.55); line-height:1.4;}
+
+  /* ---------- GAME SHELL ---------- */
+  #screen-game{display:none;}
+  .hud-bar{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.7rem;
+    background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:0.8rem 1.1rem; margin-bottom:1rem;
+  }
+  .hud-hero{display:flex; align-items:center; gap:0.5rem; font-size:0.72rem; color:rgba(236,224,196,0.75);}
+  .hud-hero .track{width:70px; height:7px; border-radius:999px; background:rgba(236,224,196,0.1); overflow:hidden;}
+  .hud-hero .fill{height:100%; background:linear-gradient(90deg, var(--teal), var(--gold));}
+  .hud-loc{font-size:0.7rem; color:var(--gold); letter-spacing:0.05em;}
+
+  .subnav{display:flex; gap:0.4rem; margin-bottom:1.4rem; background:var(--panel-2); padding:0.4rem; border-radius:10px;}
+  .subnav-btn{
+    flex:1; background:none; border:none; color:rgba(236,224,196,0.55); padding:0.65rem 0.5rem; border-radius:7px;
+    font-family:'Cinzel',serif; font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase;
+    transition:background 0.2s ease, color 0.2s ease;
+  }
+  .subnav-btn.active{background:var(--gold); color:#241c12; font-weight:600;}
+
+  .panel-view{display:none;}
+  .panel-view.active{display:block; animation:fadeUp 0.3s ease;}
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- STORY PANEL ---------- */
+  .node-panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:2.2rem 2rem;
+    box-shadow:0 24px 60px -24px rgba(0,0,0,0.7);
+  }
+  .node-tag{font-size:0.66rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:1rem;}
+  .node-text{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:clamp(1.1rem,2.6vw,1.35rem); line-height:1.75; color:rgba(236,224,196,0.94); white-space:pre-line;}
+  .choices{display:flex; flex-direction:column; gap:0.7rem; margin-top:1.6rem;}
+  .choice-btn{
+    text-align:left; background:var(--panel-2); border:1px solid var(--line); color:var(--parchment);
+    padding:0.95rem 1.2rem; border-radius:8px; font-size:0.88rem; transition:border-color 0.2s ease, transform 0.15s ease, background 0.2s ease;
+  }
+  .choice-btn:hover{border-color:var(--gold); transform:translateX(4px); background:#2a2540;}
+  .choice-btn .arrow{color:var(--gold); margin-right:0.5rem;}
+
+  /* ---------- CHECK (dice + escolha de personagem) ---------- */
+  .check-box{text-align:center; margin-top:1.6rem; padding-top:1.4rem; border-top:1px dashed var(--line);}
+  .check-label{font-size:0.85rem; color:rgba(236,224,196,0.7); margin-bottom:1.2rem;}
+  .check-pick{display:flex; gap:0.8rem; justify-content:center; flex-wrap:wrap; margin-bottom:1.2rem;}
+  .check-pick-btn{
+    background:var(--panel-2); border:1px solid var(--line); color:var(--parchment); padding:0.8rem 1.2rem; border-radius:8px;
+    font-size:0.82rem; transition:border-color 0.2s ease;
+  }
+  .check-pick-btn:hover{border-color:var(--gold);}
+  .dice{
+    width:64px; height:64px; margin:0 auto 1rem; border-radius:10px; background:var(--panel-2); border:2px solid var(--gold);
+    display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:1.6rem; color:var(--gold);
+  }
+  .dice.rolling{animation:diceRoll 0.06s linear infinite;}
+  @keyframes diceRoll{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+  .roll-result{font-size:0.8rem; color:rgba(236,224,196,0.6); min-height:1.4em; margin-bottom:1rem;}
+
+  /* ---------- COMBAT ---------- */
+  .combat-box{margin-top:1.4rem; padding-top:1.4rem; border-top:1px dashed var(--line);}
+  .enemy-card{text-align:center; margin-bottom:1.2rem;}
+  .enemy-card h4{font-family:'Cinzel',serif; font-size:1rem; margin-bottom:0.5rem;}
+  .hp-track{height:9px; border-radius:999px; background:rgba(236,224,196,0.1); overflow:hidden;}
+  .hp-fill{height:100%; background:linear-gradient(90deg, var(--red), #d97a4a); transition:width 0.4s ease;}
+  .hp-fill.party{background:linear-gradient(90deg, var(--teal), var(--gold));}
+  .hp-label{font-size:0.68rem; color:rgba(236,224,196,0.5); margin-top:0.3rem;}
+  .heroes-combat{display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.1rem;}
+  .hero-combat-card{background:var(--panel-2); border-radius:10px; padding:0.9rem; text-align:center; border:1px solid transparent; transition:border-color 0.3s ease;}
+  .hero-combat-card.downed{opacity:0.55; border-color:var(--red);}
+  .hero-combat-card.dead{opacity:0.35;}
+  .hero-combat-card h5{font-family:'Cinzel',serif; font-size:0.85rem; margin-bottom:0.5rem;}
+  .hero-status{font-size:0.66rem; color:var(--rose); margin-top:0.2rem;}
+  .death-pips{display:flex; gap:3px; justify-content:center; margin-top:0.3rem;}
+  .death-pip{width:8px; height:8px; border-radius:50%; background:rgba(236,224,196,0.15); border:1px solid var(--line);}
+  .death-pip.fail{background:var(--red);}
+  .death-pip.success{background:var(--teal);}
+  .hero-combat-card .hc-actions{display:flex; flex-direction:column; gap:0.4rem; margin-top:0.7rem;}
+  .ability-btn{
+    background:var(--panel-3); border:1px solid var(--line); color:var(--parchment); padding:0.5rem 0.6rem;
+    border-radius:7px; font-size:0.68rem; text-align:left; display:flex; justify-content:space-between; gap:0.4rem;
+    transition:border-color 0.2s ease;
+  }
+  .ability-btn:hover:not(:disabled){border-color:var(--gold);}
+  .ability-btn:disabled{opacity:0.35; cursor:not-allowed;}
+  .ability-btn .ab-acc{color:rgba(236,224,196,0.4); font-size:0.62rem;}
+  .revive-btn{background:var(--teal); border:none; color:#0f2622; font-weight:600;}
+  .combat-log{
+    background:var(--panel-2); border-radius:8px; padding:0.9rem 1.1rem; font-size:0.78rem; color:rgba(236,224,196,0.75);
+    max-height:140px; overflow-y:auto; margin-bottom:1rem; line-height:1.6;
+  }
+
+  /* ---------- MAP ---------- */
+  .map-panel{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:2rem 1.6rem;}
+  .map-path{display:flex; flex-direction:column; gap:0; position:relative;}
+  .map-stop{display:flex; align-items:center; gap:1rem; padding:0.9rem 0; position:relative;}
+  .map-stop::before{
+    content:""; position:absolute; left:23px; top:-4px; bottom:-4px; width:2px; background:var(--line); z-index:0;
+  }
+  .map-stop:first-child::before{top:50%;}
+  .map-stop:last-child::before{bottom:50%;}
+  .map-icon{
+    width:48px; height:48px; border-radius:50%; background:var(--panel-2); border:2px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; position:relative; z-index:1;
+    filter:grayscale(1); opacity:0.35;
+  }
+  .map-stop.visited .map-icon{filter:none; opacity:1; border-color:var(--gold);}
+  .map-stop.current .map-icon{border-color:var(--rose); box-shadow:0 0 0 4px rgba(201,116,140,0.25); animation:pulseMap 1.8s ease-in-out infinite;}
+  @keyframes pulseMap{ 0%,100%{box-shadow:0 0 0 4px rgba(201,116,140,0.25);} 50%{box-shadow:0 0 0 8px rgba(201,116,140,0.08);} }
+  .map-info h5{font-family:'Cinzel',serif; font-size:0.9rem; color:rgba(236,224,196,0.4);}
+  .map-stop.visited .map-info h5{color:var(--parchment);}
+  .map-info p{font-size:0.76rem; color:rgba(236,224,196,0.5); max-width:46ch; margin-top:0.2rem;}
+
+  /* ---------- FICHA DE PERSONAGEM ---------- */
+  .sheet-grid{display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;}
+  @media (max-width:600px){ .sheet-grid{grid-template-columns:1fr;} }
+  .sheet-card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:1.6rem 1.4rem;}
+  .sheet-card h3{font-family:'Cinzel',serif; font-size:1.1rem; margin-bottom:0.2rem;}
+  .sheet-class{font-size:0.74rem; color:var(--gold); margin-bottom:1rem;}
+  .sheet-stat-row{display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:0.5rem; color:rgba(236,224,196,0.75);}
+  .sheet-stat-row b{color:var(--parchment); font-family:'Cinzel',serif;}
+  .sheet-inv{margin-top:1.1rem; padding-top:1rem; border-top:1px dashed var(--line);}
+  .sheet-inv-label{font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:rgba(236,224,196,0.45); margin-bottom:0.5rem;}
+  .sheet-inv-item{display:inline-block; background:var(--panel-2); border-radius:999px; padding:0.3rem 0.8rem; font-size:0.72rem; margin:0 0.35rem 0.35rem 0;}
+
+  footer{text-align:center; padding:5vh 6vw; font-size:0.68rem; letter-spacing:0.12em; text-transform:uppercase; color:rgba(236,224,196,0.3);}
+</style>
+<link rel="stylesheet" href="transitions.css">
+<script src="transitions.js" defer></script>
+<link rel="stylesheet" href="rpg-world.css">
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top-bar">
+    <a class="back-link" href="index.html">&larr; voltar pro site</a>
+  </div>
+
+  <!-- TITLE -->
+  <section id="screen-title">
+    <div class="emblem">⚔️🔮</div>
+    <h1>Crônicas do Véu</h1>
+    <div class="subtitle">Ato I: O Chamado &middot; Ato II: A Vila dos Faróis</div>
+    <p>Um reino esquecendo aos poucos por que ama. Dois heróis, uma jornada, e um mal antigo que se alimenta de memórias afetivas. Peguem seus dados — essa aventura é de vocês dois.</p>
+    <div class="title-actions">
+      <button class="rpg-btn" id="btn-new-game">nova aventura</button>
+      <button class="rpg-btn ghost" id="btn-continue" style="display:none;">continuar aventura</button>
+    </div>
+  </section>
+
+  <!-- CHARACTER CREATION -->
+  <section id="screen-create">
+    <div class="create-hero">
+      <h2>Escolham a classe de <span class="hero-name">Yudi</span></h2>
+      <div class="class-grid" id="class-grid-yudi"></div>
+    </div>
+    <div class="create-hero">
+      <h2>Escolham a classe de <span class="hero-name">Karol</span></h2>
+      <div class="class-grid" id="class-grid-karol"></div>
+    </div>
+    <div style="text-align:center; margin-top:2rem;">
+      <button class="rpg-btn" id="btn-start-adventure">começar a jornada</button>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="screen-game">
+    <div class="hud-bar" id="hud-bar"></div>
+    <div class="subnav">
+      <button class="subnav-btn active" data-panel="historia">📖 história</button>
+      <button class="subnav-btn" data-panel="mapa">🗺️ mapa</button>
+      <button class="subnav-btn" data-panel="ficha">🎭 personagens</button>
+    </div>
+
+    <div class="panel-view active" id="panel-historia">
+      <div id="rpg-world-host"></div><div class="node-panel" id="node-panel"></div>
+    </div>
+    <div class="panel-view" id="panel-mapa">
+      <div class="map-panel"><div class="map-path" id="map-path"></div></div>
+    </div>
+    <div class="panel-view" id="panel-ficha">
+      <div class="sheet-grid" id="sheet-grid"></div>
+    </div>
+  </section>
+</div>
+
+<footer>crônicas do véu &middot; ato I de uma saga em construção &middot; feito com carinho por Yudi &amp; Karol</footer>
+
+<script>
+/* ================= CLASSES ================= */
+const CLASSES = [
+  {
+    id:"guerreiro", nome:"Guerreiro(a)", icon:"🛡️", desc:"+3 em Força. Mais resistência em combate corpo a corpo.", bonus:{forca:3, hp:6},
+    abilities:[
+      { id:"golpe", nome:"Golpe Certeiro", icon:"⚔️", stat:"forca", acc:1, dmgMin:4, dmgMax:9, desc:"Ataque equilibrado, boa chance de acerto." },
+      { id:"investida", nome:"Investida Brutal", icon:"🪓", stat:"forca", acc:-3, dmgMin:8, dmgMax:14, desc:"Muito dano, mas mais fácil de errar." },
+      { id:"grito_guerra", nome:"Grito de Guerra", icon:"📣", tipo:"buff", desc:"+4 no próximo ataque de qualquer um dos dois. Não causa dano." },
+      { id:"furia", nome:"Fúria Implacável", icon:"🔥", stat:"forca", acc:-5, dmgMin:12, dmgMax:20, desc:"Dano brutal, mas bem fácil de errar." }
+    ]
+  },
+  {
+    id:"arqueiro", nome:"Arqueiro(a)", icon:"🏹", desc:"+3 em Destreza. Melhor em furtividade e testes de agilidade.", bonus:{destreza:3, hp:2},
+    abilities:[
+      { id:"tiro", nome:"Tiro Certeiro", icon:"🎯", stat:"destreza", acc:2, dmgMin:4, dmgMax:8, desc:"Ataque preciso à distância." },
+      { id:"flecha_dupla", nome:"Flecha Dupla", icon:"🏹", stat:"destreza", acc:0, dmgMin:2, dmgMax:5, hits:2, desc:"Dois disparos rápidos, cada um pode acertar ou errar." },
+      { id:"mira_precisa", nome:"Mira Precisa", icon:"🔭", stat:"destreza", acc:5, dmgMin:6, dmgMax:11, desc:"Quase impossível de errar, dano alto." },
+      { id:"chuva_flechas", nome:"Chuva de Flechas", icon:"🌧️", stat:"destreza", acc:-1, dmgMin:3, dmgMax:6, hits:3, desc:"Três disparos seguidos, cada um pode acertar ou errar." }
+    ]
+  },
+  {
+    id:"mago", nome:"Mago(a)", icon:"🔮", desc:"+3 em Magia. Enxerga através de ilusões e enigmas antigos.", bonus:{magia:3, hp:0},
+    abilities:[
+      { id:"lampejo", nome:"Lampejo Arcano", icon:"✨", stat:"magia", acc:1, dmgMin:3, dmgMax:8, desc:"Explosão de energia mágica básica." },
+      { id:"escudo_mana", nome:"Escudo de Mana", icon:"🔷", tipo:"escudo", desc:"Reduz pela metade o próximo dano que você receber." },
+      { id:"explosao_arcana", nome:"Explosão Arcana", icon:"💥", stat:"magia", acc:-2, dmgMin:9, dmgMax:15, desc:"Dano devastador, mas exige mais precisão pra acertar." },
+      { id:"selo_arcano", nome:"Selo Arcano", icon:"🔻", tipo:"debuff", desc:"Reduz a defesa do inimigo em 3 pelo resto do combate." }
+    ]
+  }
+];
+
+/* ================= MAPA ================= */
+const MAP_LOCATIONS = [
+  { id:"loc_solvenna", nome:"Solvenna", icon:"🏘️", desc:"A vila natal de vocês dois, ainda intacta, ainda cheirando a pão quente pela manhã." },
+  { id:"loc_encruzilhada", nome:"A Encruzilhada", icon:"🛤️", desc:"Onde a estrada principal se divide em dois caminhos possíveis." },
+  { id:"loc_rota", nome:"Estrada ou Floresta", icon:"🌾", desc:"O trecho de viagem entre Solvenna e a Vila da Ponte, seja qual caminho vocês tenham escolhido." },
+  { id:"loc_vilaponte", nome:"Vila da Ponte", icon:"🌉", desc:"Um vilarejo pequeno construído ao redor de uma ponte de pedra centenária." },
+  { id:"loc_caverna", nome:"Caverna do Eco", icon:"🕳️", desc:"Onde a primeira Relíquia do Coração ficou escondida por séculos." },
+  { id:"loc_pantano", nome:"Pântano Esquecido", icon:"🌫️", desc:"Uma extensão de névoa e água parada entre a Vila da Ponte e a costa." },
+  { id:"loc_acampamento", nome:"Fronteira da Costa", icon:"⛺", desc:"O último acampamento antes da estrada que leva à Vila dos Faróis." },
+  { id:"loc_costeira", nome:"Estrada da Costa", icon:"🌅", desc:"Dias de caminhada acompanhando o litoral, com o mar sempre à vista." },
+  { id:"loc_vilafarois", nome:"Vila dos Faróis", icon:"🏮", desc:"Um povoado de pescadores construído ao redor de um farol centenário." },
+  { id:"loc_grutas", nome:"Grutas da Maré", icon:"🌊", desc:"Cavernas costeiras que só podem ser atravessadas na maré baixa." },
+  { id:"loc_farol", nome:"Farol Afundado", icon:"🗼", desc:"A torre de luz que guia os pescadores — e esconde uma passagem secreta." },
+  { id:"loc_naufragio", nome:"Naufrágio do Áurea", icon:"⚓", desc:"Os destroços de um antigo navio, onde a segunda Relíquia do Coração foi escondida." }
+];
+
+/* ================= HISTÓRIA — ATO I ================= */
+const STORY = {
+  start:{
+    loc:"loc_solvenna", tag:"Prólogo",
+    text:"A vila de Solvenna dorme em paz — até o céu ficar violeta demais pra ser só o entardecer.\n\nVocês dois estão sentados na varanda de casa, o silêncio quebrado só pelo som de grilos, quando uma sombra em forma de corvo pousa no parapeito da janela e se desfaz numa figura encapuzada.\n\n\"Desculpem a hora\", ela diz, curvando-se. \"Meu nome é Oriel. E o mundo está esquecendo como amar.\"",
+    choices:[ { label:"Abrir a porta pra ela", next:"mensageiro" } ]
+  },
+  mensageiro:{
+    loc:"loc_solvenna", tag:"O Chamado",
+    text:"Oriel se senta à mesa de vocês como se já tivesse feito isso mil vezes. Ela explica: um mal antigo chamado o Véu está se espalhando a partir da Floresta Sussurrante, avançando vila por vila. Onde ele passa, as pessoas continuam vivendo — mas esquecem por que se importam umas com as outras.\n\n\"Existe um contra-ritual\", ela diz, \"mas precisa de três Relíquias do Coração, escondidas há séculos, e de um vínculo forte o bastante pra resistir ao Véu enquanto o ritual é feito.\"",
+    choices:[
+      { label:"\"Aceitar a missão sem mais perguntas\"", next:"partida" },
+      { label:"\"Por que nós dois, especificamente?\"", next:"pergunta_porque" },
+      { label:"\"Isso é perigoso?\"", next:"pergunta_perigo" },
+      { label:"\"Quem mais já tentou isso antes?\"", next:"pergunta_outros" },
+      { label:"\"Precisamos de um instante a sós\"", next:"pergunta_a_sos" }
+    ]
+  },
+  pergunta_porque:{
+    loc:"loc_solvenna", tag:"O Chamado",
+    text:"Oriel sorri de leve, como quem já esperava a pergunta.\n\n\"Existe uma magia antiga pra medir esse tipo de coisa. Vínculos, promessas guardadas, tempo compartilhado sem pressa nenhuma de acabar. O de vocês dois é raro. Forte o bastante pra segurar a vela acesa enquanto eu faço o ritual lá na frente.\"",
+    choices:[ { label:"Fazer outra pergunta", next:"mensageiro" }, { label:"Aceitar a missão", next:"partida" } ]
+  },
+  pergunta_perigo:{
+    loc:"loc_solvenna", tag:"O Chamado",
+    text:"Oriel hesita, sopesando quanto contar. \"Perigoso o bastante pra eu não prometer que vai ser fácil. Vocês vão enfrentar criaturas que o Véu distorceu, lugares que mexem com a cabeça de quem entra. Mas não estão sozinhos nisso — eu vou acompanhar de longe, o quanto conseguir.\"",
+    choices:[ { label:"Fazer outra pergunta", next:"mensageiro" }, { label:"Aceitar a missão", next:"partida" } ]
+  },
+  pergunta_outros:{
+    loc:"loc_solvenna", tag:"O Chamado",
+    text:"\"Sim\", ela admite, baixando os olhos. \"Duas duplas tentaram antes de vocês. Uma desistiu na primeira semana — o vínculo não era forte o bastante, e o Véu achou a rachadura e alargou. Da outra... ainda estamos tentando entender o que aconteceu. Não achei justo esconder isso.\"",
+    choices:[ { label:"Fazer outra pergunta", next:"mensageiro" }, { label:"Aceitar a missão", next:"partida" } ]
+  },
+  pergunta_a_sos:{
+    loc:"loc_solvenna", tag:"O Chamado",
+    text:"Oriel se levanta, educada. \"Claro. Eu espero do lado de fora.\"\n\nVocês dois se olham em silêncio por um instante — sem precisar de muitas palavras pra saber que a resposta já estava decidida desde que ela pousou na janela.",
+    choices:[ { label:"Chamar Oriel de volta e aceitar", next:"partida" } ]
+  },
+  partida:{
+    loc:"loc_encruzilhada", tag:"Capítulo 1 — A Estrada",
+    text:"Vocês arrumam as mochilas ainda de madrugada, cada um com sua própria bolsa e sua própria poção de cura guardada com cuidado. Oriel indica o caminho até a Floresta Sussurrante, mas avisa: a primeira Relíquia, o Coração de Pedra, está escondida numa caverna perto da Vila da Ponte.\n\nNo fim da rua principal de Solvenna, a estrada se divide em duas.",
+    onEnter:(st) => { addItem(st.yudi, "Poção de Cura"); addItem(st.karol, "Poção de Cura"); },
+    choices:[
+      { label:"Seguir pela Estrada Velha — mais longa, mais segura", next:"estrada_velha" },
+      { label:"Cortar caminho pela Floresta Baixa — mais rápido, mais arriscado", next:"floresta_baixa" }
+    ]
+  },
+
+  /* --- ROTA A: ESTRADA VELHA (mercador, 5 escolhas) --- */
+  estrada_velha:{
+    loc:"loc_rota", tag:"Capítulo 1 — Estrada Velha",
+    text:"A Estrada Velha é tranquila, ladeada por plantações e casebres de fazendeiros. No caminho, um mercador ambulante empurra um carrinho cheio de frascos coloridos.\n\n\"Poções de cura, baratas, pra quem tem cara de gente que vai precisar\", ele diz, sorrindo.",
+    choices:[
+      { label:"Comprar uma Poção de Cura pro Yudi", next:"merchant_yudi" },
+      { label:"Comprar uma Poção de Cura pra Karol", next:"merchant_karol" },
+      { label:"Perguntar se ele viu algo estranho na estrada", next:"merchant_pergunta" },
+      { label:"Perguntar se ele já ouviu falar da Caverna do Eco", next:"merchant_caverna" },
+      { label:"Agradecer e seguir sem comprar nada", next:"vila_ponte" }
+    ]
+  },
+  merchant_yudi:{
+    loc:"loc_rota", tag:"Capítulo 1 — Estrada Velha",
+    text:"Vocês entregam algumas moedas e o mercador embrulha um frasco pequeno, entregando com cuidado nas mãos de Yudi.",
+    onEnter:(st) => addItem(st.yudi, "Poção de Cura"),
+    choices:[ { label:"Seguir para a Vila da Ponte", next:"vila_ponte" } ]
+  },
+  merchant_karol:{
+    loc:"loc_rota", tag:"Capítulo 1 — Estrada Velha",
+    text:"Vocês entregam algumas moedas e o mercador embrulha um frasco pequeno, entregando com cuidado nas mãos de Karol.",
+    onEnter:(st) => addItem(st.karol, "Poção de Cura"),
+    choices:[ { label:"Seguir para a Vila da Ponte", next:"vila_ponte" } ]
+  },
+  merchant_pergunta:{
+    loc:"loc_rota", tag:"Capítulo 1 — Estrada Velha",
+    text:"O mercador baixa a voz. \"Os fazendeiros andam estranhos ultimamente. Cumprimentam a gente sem olhar nos olhos, sabe? Como se tivessem esquecido como se faz.\" Ele dá de ombros, incomodado.",
+    choices:[ { label:"Voltar a conversar com ele", next:"estrada_velha" }, { label:"Seguir para a Vila da Ponte", next:"vila_ponte" } ]
+  },
+  merchant_caverna:{
+    loc:"loc_rota", tag:"Capítulo 1 — Estrada Velha",
+    text:"\"A Caverna do Eco? Já ouvi falar, sim\", ele diz, ajeitando o carrinho. \"Dizem que tem um guardião de pedra lá dentro. Nunca vi ninguém que tenha entrado e saído rindo, mas também nunca vi ninguém que não tenha saído.\"",
+    choices:[ { label:"Voltar a conversar com ele", next:"estrada_velha" }, { label:"Seguir para a Vila da Ponte", next:"vila_ponte" } ]
+  },
+
+  /* --- ROTA B: FLORESTA BAIXA (combate) --- */
+  floresta_baixa:{
+    loc:"loc_rota", tag:"Capítulo 1 — Floresta Baixa",
+    text:"A Floresta Baixa é mais rápida, mas a vegetação fechada esconde os sons ao redor. No meio do caminho, dois olhos amarelos brilham entre as árvores — e depois mais dois. Um par de lobos selvagens, já afetados pelo Véu, cerca vocês com um rosnado baixo.",
+    choices:[ { label:"Lutar", next:"combate_lobos" } ]
+  },
+  combate_lobos:{
+    loc:"loc_rota", tag:"Combate", type:"combat",
+    text:"Os lobos avançam sem hesitar. É hora de lutar, lado a lado — mas cada um por si, se for preciso.",
+    combat:{ enemyName:"Lobos do Véu", enemyHp:22, enemyAtkMin:4, enemyAtkMax:8, enemyDef:11, enemyAcc:5, win:"vila_ponte" }
+  },
+
+  /* --- VILA DA PONTE --- */
+  vila_ponte:{
+    loc:"loc_vilaponte", tag:"Capítulo 2 — Vila da Ponte",
+    text:"Vocês chegam à Vila da Ponte ao entardecer, cansados mas inteiros. É um lugarzinho pequeno, construído ao redor de uma ponte de pedra sobre um rio raso. Na única estalagem do vilarejo, a taverneira Dona Marta os recebe com um prato quente e os olhos apertados de curiosidade.\n\n\"Forasteiros indo pra Caverna do Eco?\", ela pergunta, sem nem esperar resposta.",
+    choices:[ { label:"Perguntar sobre a caverna", next:"dicas_marta" } ]
+  },
+  dicas_marta:{
+    loc:"loc_vilaponte", tag:"Capítulo 2 — Vila da Ponte",
+    text:"Dona Marta se inclina sobre o balcão, disposta a conversar.",
+    choices:[
+      { label:"\"O que exatamente guarda a caverna?\"", next:"marta_guardiao" },
+      { label:"\"A senhora já foi lá dentro?\"", next:"marta_historia" },
+      { label:"\"Tem alguma dica de sobrevivência?\"", next:"marta_dica" },
+      { label:"\"Por que a vila se chama Vila da Ponte?\"", next:"marta_lore" },
+      { label:"\"Acho que já sabemos o suficiente, vamos seguir\"", next:"entrada_caverna" }
+    ]
+  },
+  marta_guardiao:{
+    loc:"loc_vilaponte", tag:"Capítulo 2 — Vila da Ponte",
+    text:"\"Tem um guardião lá dentro. Pedra viva, do tamanho de uma casa. Ele não ataca por acaso — ataca quando sente mentira no ar. Se ele fizer uma pergunta, respondam com a verdade mais simples que tiverem. Nada de esperteza.\"",
+    choices:[ { label:"Perguntar mais", next:"dicas_marta" }, { label:"Seguir para a caverna", next:"entrada_caverna" } ]
+  },
+  marta_historia:{
+    loc:"loc_vilaponte", tag:"Capítulo 2 — Vila da Ponte",
+    text:"Ela balança a cabeça. \"Fui, uma vez, anos atrás, atrás de um anel que minha irmã tinha perdido lá dentro sem querer. Consegui sair com o anel e um baita susto. Desde então, prefiro ficar do lado de cá do balcão.\"",
+    choices:[ { label:"Perguntar mais", next:"dicas_marta" }, { label:"Seguir para a caverna", next:"entrada_caverna" } ]
+  },
+  marta_dica:{
+    loc:"loc_vilaponte", tag:"Capítulo 2 — Vila da Ponte",
+    text:"\"Pisem devagar. O chão da entrada tá cheio de pedrinhas soltas — quem faz barulho acorda o guardião antes da hora. E se ele fizer uma pergunta, respondam com a verdade mais simples que tiverem.\"",
+    choices:[ { label:"Perguntar mais", next:"dicas_marta" }, { label:"Seguir para a caverna", next:"entrada_caverna" } ]
+  },
+  marta_lore:{
+    loc:"loc_vilaponte", tag:"Capítulo 2 — Vila da Ponte",
+    text:"\"Essa ponte aqui fora tem mais de dois séculos\", ela diz, orgulhosa. \"Dizem que foi construída por um casal de pedreiros que queria um jeito de se ver todo dia, mesmo morando em margens opostas do rio. Romântico, né? Isso foi bem antes do Véu.\"",
+    choices:[ { label:"Perguntar mais", next:"dicas_marta" }, { label:"Seguir para a caverna", next:"entrada_caverna" } ]
+  },
+
+  /* --- CAVERNA DO ECO --- */
+  entrada_caverna:{
+    loc:"loc_caverna", tag:"Capítulo 2 — Caverna do Eco", type:"check",
+    text:"A entrada da caverna é estreita, e cada passo ecoa de um jeito estranho — como se a caverna repetisse as palavras de vocês num tom levemente errado, atrasado, distorcido. O chão está coberto de pedrinhas soltas.",
+    check:{ stat:"destreza", dc:12, label:"Teste de Destreza — atravessar sem fazer barulho", success:"caverna_furtivo", fail:"caverna_barulho" }
+  },
+  caverna_furtivo:{
+    loc:"loc_caverna", tag:"Capítulo 2 — Caverna do Eco",
+    text:"Vocês avançam com cuidado, quase sem respirar, e chegam ao salão principal sem acordar nada. O guardião ainda dorme, imóvel, parecendo só mais uma formação de pedra no centro da sala.",
+    choices:[ { label:"Aproximar-se com calma", next:"sala_golem" } ]
+  },
+  caverna_barulho:{
+    loc:"loc_caverna", tag:"Capítulo 2 — Caverna do Eco",
+    text:"Uma pedra rola sob o pé de vocês com um estalo alto demais. No salão à frente, dois pontos de luz âmbar se acendem dentro do que parecia ser só uma pilha de pedras — o guardião já está de pé quando vocês chegam.",
+    choices:[ { label:"Entrar mesmo assim, alertas", next:"sala_golem" } ]
+  },
+  sala_golem:{
+    loc:"loc_caverna", tag:"Capítulo 2 — O Guardião",
+    text:"O guardião é um golem de pedra antiga, musgo crescendo nas juntas, olhos de âmbar fraco. Sobre um pedestal atrás dele, meio brilho pulsa: o Coração de Pedra.\n\nA voz do golem soa como pedra raspando em pedra: \"O que atravessa a distância mais rápido que os pés, mais fundo que o mar, e não se quebra mesmo quando é testado todos os dias?\"",
+    choices:[
+      { label:"\"Confiança.\"", next:"resposta_certa" },
+      { label:"\"Poder.\"", next:"resposta_errada" },
+      { label:"\"Medo.\"", next:"resposta_errada" },
+      { label:"Pedir pra ele repetir o enigma, pra pensar melhor", next:"golem_repete" },
+      { label:"Tentar se esgueirar até o pedestal sem responder", next:"golem_esgueirar" }
+    ]
+  },
+  golem_repete:{
+    loc:"loc_caverna", tag:"Capítulo 2 — O Guardião",
+    text:"O golem repete a pergunta, palavra por palavra, sem se alterar. \"O que atravessa a distância mais rápido que os pés, mais fundo que o mar, e não se quebra mesmo quando é testado todos os dias?\" Ele parece disposto a esperar.",
+    choices:[
+      { label:"\"Confiança.\"", next:"resposta_certa" },
+      { label:"\"Poder.\"", next:"resposta_errada" },
+      { label:"\"Medo.\"", next:"resposta_errada" },
+      { label:"Tentar se esgueirar até o pedestal sem responder", next:"golem_esgueirar" }
+    ]
+  },
+  golem_esgueirar:{
+    loc:"loc_caverna", tag:"Capítulo 2 — O Guardião",
+    text:"O braço de pedra corta o caminho antes que vocês deem o segundo passo. \"Ninguém passa sem responder\", ele resmunga, já se preparando pra atacar.",
+    choices:[ { label:"Lutar", next:"combate_golem" } ]
+  },
+  resposta_certa:{
+    loc:"loc_caverna", tag:"Capítulo 2 — O Guardião",
+    text:"Os olhos de âmbar do golem se suavizam, quase como se ele sorrisse — se pedra pudesse sorrir. Ele dá um passo pesado pro lado, abrindo caminho até o pedestal.\n\n\"Correto\", ele resmunga. \"Peguem o que vieram buscar.\"",
+    choices:[ { label:"Pegar o Coração de Pedra", next:"relíquia1" } ]
+  },
+  resposta_errada:{
+    loc:"loc_caverna", tag:"Capítulo 2 — O Guardião",
+    text:"O golem balança a cabeça de pedra, decepcionado. \"Resposta errada tem preço.\" Ele ergue os punhos enormes, e o chão da caverna treme sob o primeiro passo dele na direção de vocês.",
+    choices:[ { label:"Lutar", next:"combate_golem" } ]
+  },
+  combate_golem:{
+    loc:"loc_caverna", tag:"Combate", type:"combat",
+    text:"Não há mais tempo pra enigmas — só pra reflexos.",
+    combat:{ enemyName:"Golem de Pedra", enemyHp:34, enemyAtkMin:6, enemyAtkMax:11, enemyDef:13, enemyAcc:6, win:"relíquia1" }
+  },
+  "relíquia1":{
+    loc:"loc_caverna", tag:"Capítulo 2 — A Primeira Relíquia",
+    text:"O Coração de Pedra é menor do que vocês imaginavam — cabe na palma da mão, quente como se tivesse um pulso próprio. No instante em que os dedos de vocês dois se tocam sobre ele, ao mesmo tempo, uma onda de calma atravessa o peito de ambos.\n\nA figura de Oriel aparece, tênue, como se projetada pela própria luz da relíquia. \"Uma de três\", ela diz. \"Descansem essa noite na Vila da Ponte — vocês vão precisar.\"",
+    onEnter:(st) => { st.flags.relic1 = true; },
+    choices:[ { label:"Voltar para a Vila da Ponte", next:"descanso_vila" } ]
+  },
+
+  /* --- DESCANSO NA VILA --- */
+  descanso_vila:{
+    loc:"loc_vilaponte", tag:"Capítulo 3 — Uma Noite de Descanso",
+    text:"Dona Marta os recebe de volta com os olhos arregalados ao ver a relíquia brilhando de leve na mochila. \"Então é real\", ela sussurra. \"Fiquem essa noite, por conta da casa.\" Ela também comenta, baixinho, sobre um caminho ao sul que leva a um pântano — o próximo trecho da rota até a costa.",
+    choices:[
+      { label:"Yudi cuida dos ferimentos de Karol", next:"descanso_cuidar_karol" },
+      { label:"Karol cuida dos ferimentos de Yudi", next:"descanso_cuidar_yudi" },
+      { label:"Perguntar a Dona Marta mais sobre o pântano à frente", next:"descanso_pergunta_pantano" },
+      { label:"Comprar suprimentos extras antes de seguir", next:"descanso_suprimentos" },
+      { label:"Apenas descansar em silêncio, um ao lado do outro", next:"saida_pantano" }
+    ]
+  },
+  descanso_cuidar_karol:{
+    loc:"loc_vilaponte", tag:"Capítulo 3 — Uma Noite de Descanso",
+    text:"Yudi limpa um corte no braço de Karol com cuidado desnecessário, demorando mais do que precisava. Nenhum dos dois reclama da demora.",
+    onEnter:(st) => { st.karol.hp = Math.min(st.karol.maxHp, st.karol.hp + 8); },
+    choices:[ { label:"Seguir para o pântano pela manhã", next:"saida_pantano" } ]
+  },
+  descanso_cuidar_yudi:{
+    loc:"loc_vilaponte", tag:"Capítulo 3 — Uma Noite de Descanso",
+    text:"Karol enrola uma bandagem no ombro de Yudi, apertando só o suficiente. \"Pronto. Sobrevive mais um dia\", ela brinca, e os dois riem baixinho.",
+    onEnter:(st) => { st.yudi.hp = Math.min(st.yudi.maxHp, st.yudi.hp + 8); },
+    choices:[ { label:"Seguir para o pântano pela manhã", next:"saida_pantano" } ]
+  },
+  descanso_pergunta_pantano:{
+    loc:"loc_vilaponte", tag:"Capítulo 3 — Uma Noite de Descanso",
+    text:"\"O Pântano Esquecido\", Dona Marta diz, com um arrepio visível. \"Névoa que confunde direção, luzes que não são luzes de verdade. Mas tem uma velha que mora lá, Vovó Sarça. Se acharem a cabana dela, estão salvos.\"",
+    choices:[ { label:"Seguir para o pântano pela manhã", next:"saida_pantano" } ]
+  },
+  descanso_suprimentos:{
+    loc:"loc_vilaponte", tag:"Capítulo 3 — Uma Noite de Descanso",
+    text:"Vocês gastam as últimas moedas em mantimentos e uma poção extra, dividida igualmente entre os dois.",
+    onEnter:(st) => { addItem(st.yudi, "Poção de Cura"); addItem(st.karol, "Poção de Cura"); },
+    choices:[ { label:"Seguir para o pântano pela manhã", next:"saida_pantano" } ]
+  },
+
+  /* --- PÂNTANO ESQUECIDO --- */
+  saida_pantano:{
+    loc:"loc_pantano", tag:"Capítulo 3 — Pântano Esquecido",
+    text:"O Pântano Esquecido começa onde a estrada simplesmente desaparece na lama. Névoa baixa cobre tudo até a altura do joelho, e sons de água pingando ecoam de direções que não fazem sentido.",
+    choices:[
+      { label:"Seguir os sons de água corrente", next:"pantano_agua" },
+      { label:"Seguir uma luz fraca ao longe", next:"pantano_luz" },
+      { label:"Procurar um caminho mais alto, fora da lama", next:"pantano_alto" },
+      { label:"Chamar por ajuda em voz alta", next:"pantano_grito" },
+      { label:"Acender uma tocha improvisada e avançar com cuidado", next:"pantano_tocha" }
+    ]
+  },
+  pantano_agua:{
+    loc:"loc_pantano", tag:"Capítulo 3 — Pântano Esquecido",
+    text:"O som de água corrente os guia até um riacho raso, mais firme sob os pés que o resto do pântano. Seguindo a correnteza, vocês avistam fumaça subindo entre as árvores tortas — sinal de fogo aceso, e talvez de gente.",
+    choices:[ { label:"Seguir a fumaça", next:"bruxa_pantano" } ]
+  },
+  pantano_luz:{
+    loc:"loc_pantano", tag:"Capítulo 3 — Pântano Esquecido",
+    text:"A luz fraca balança entre as árvores, quase como se estivesse chamando vocês. Quando chegam perto, descobrem que é uma lanterna pendurada na porta de uma cabana torta, coberta de musgo.",
+    choices:[ { label:"Bater na porta", next:"bruxa_pantano" } ]
+  },
+  pantano_alto:{
+    loc:"loc_pantano", tag:"Capítulo 3 — Pântano Esquecido",
+    text:"Vocês encontram uma trilha de pedras um pouco mais alta que o resto do pântano, seca o bastante pra andar sem afundar. No meio do caminho, um amuleto de osso e barbante está preso entre duas raízes — alguém o deixou ali, de propósito ou não.",
+    onEnter:(st) => { addItem(st.yudi, "Amuleto do Pântano"); },
+    choices:[ { label:"Seguir a trilha até uma cabana ao longe", next:"bruxa_pantano" } ]
+  },
+  pantano_grito:{
+    loc:"loc_pantano", tag:"Capítulo 3 — Pântano Esquecido",
+    text:"O grito de vocês ecoa longe demais pelo pântano — longe o bastante pra acordar algo que preferia continuar dormindo na lama. Uma forma coberta de limo e juncos se ergue da água parada, rosnando.",
+    choices:[ { label:"Lutar", next:"combate_criatura" } ]
+  },
+  combate_criatura:{
+    loc:"loc_pantano", tag:"Combate", type:"combat",
+    text:"A criatura do pântano avança na direção de vocês, lenta mas pesada.",
+    combat:{ enemyName:"Criatura do Pântano", enemyHp:24, enemyAtkMin:5, enemyAtkMax:9, enemyDef:11, enemyAcc:5, win:"bruxa_pantano" }
+  },
+  pantano_tocha:{
+    loc:"loc_pantano", tag:"Capítulo 3 — Pântano Esquecido",
+    text:"Com uma tocha improvisada iluminando o caminho, vocês avançam devagar e sem sustos, evitando as poças mais fundas. A luz acaba revelando uma trilha de pegadas que leva direto a uma cabana torta ao longe.",
+    choices:[ { label:"Seguir as pegadas", next:"bruxa_pantano" } ]
+  },
+
+  bruxa_pantano:{
+    loc:"loc_pantano", tag:"Capítulo 3 — Vovó Sarça",
+    text:"A porta da cabana range e revela uma mulher idosa, de olhos claros demais pra idade dela, cercada de plantas secas penduradas no teto. \"Visitas\", ela diz, sem parecer surpresa. \"Sentem, sentem. O pântano não recebe muita gente viva.\"",
+    choices:[
+      { label:"\"A senhora sabe sobre o Véu?\"", next:"sarca_veu" },
+      { label:"\"Há quanto tempo mora aqui sozinha?\"", next:"sarca_historia" },
+      { label:"\"Pode nos ajudar a atravessar o pântano?\"", next:"sarca_ajuda" },
+      { label:"\"Tem algo pra trocar por comida ou suprimentos?\"", next:"sarca_troca" },
+      { label:"\"Não queremos incomodar, só de passagem\"", next:"ponte_pantano" }
+    ]
+  },
+  sarca_veu:{
+    loc:"loc_pantano", tag:"Capítulo 3 — Vovó Sarça",
+    text:"Ela suspira fundo. \"Sei mais do que gostaria. O Véu não é só esquecimento — é preguiça de sentir. É mais fácil não amar do que amar e arriscar perder. Ele se aproveita disso.\"",
+    choices:[ { label:"Perguntar mais", next:"bruxa_pantano" }, { label:"Seguir viagem", next:"ponte_pantano" } ]
+  },
+  sarca_historia:{
+    loc:"loc_pantano", tag:"Capítulo 3 — Vovó Sarça",
+    text:"\"Décadas\", ela responde, sem tristeza na voz. \"Vim aqui atrás de alguém que já não está mais entre nós. Fiquei porque o pântano parou de parecer solitário depois de um tempo. A gente se acostuma com quase tudo.\"",
+    choices:[ { label:"Perguntar mais", next:"bruxa_pantano" }, { label:"Seguir viagem", next:"ponte_pantano" } ]
+  },
+  sarca_ajuda:{
+    loc:"loc_pantano", tag:"Capítulo 3 — Vovó Sarça",
+    text:"Ela se levanta e busca, numa prateleira bagunçada, um pingente de vidro fosco amarrado num cordão surrado. \"Isso ajuda a atravessar a ponte velha logo ali na frente. Fiquem com ele.\"",
+    onEnter:(st) => { addItem(st.karol, "Amuleto de Vovó Sarça"); },
+    choices:[ { label:"Agradecer e seguir viagem", next:"ponte_pantano" } ]
+  },
+  sarca_troca:{
+    loc:"loc_pantano", tag:"Capítulo 3 — Vovó Sarça",
+    text:"\"Não preciso de moedas aqui\", ela diz, sorrindo de canto. \"Mas aceito companhia por alguns minutos. Já é o suficiente.\" Vocês conversam sobre nada em especial, e ela parece genuinamente grata.",
+    choices:[ { label:"Perguntar mais", next:"bruxa_pantano" }, { label:"Seguir viagem", next:"ponte_pantano" } ]
+  },
+
+  ponte_pantano:{
+    loc:"loc_pantano", tag:"Capítulo 3 — A Ponte Velha", type:"check",
+    text:"Uma ponte de corda estreita atravessa um trecho fundo do pântano, as tábuas apodrecidas rangendo com o vento. É a única passagem até a fronteira da costa.",
+    check:{ stat:"forca", dc:13, label:"Teste de Força — atravessar a ponte sem que ela ceda", success:"ponte_sucesso", fail:"ponte_falha", itemBonus:{ item:"Amuleto de Vovó Sarça", value:3 } }
+  },
+  ponte_sucesso:{
+    loc:"loc_pantano", tag:"Capítulo 3 — A Ponte Velha",
+    text:"Vocês atravessam com passos firmes e calculados, a ponte balançando mas aguentando o peso dos dois. Do outro lado, o ar já cheira diferente — mais salgado, mais próximo do mar.",
+    choices:[ { label:"Seguir em frente", next:"guardiao_pantano" } ]
+  },
+  ponte_falha:{
+    loc:"loc_pantano", tag:"Capítulo 3 — A Ponte Velha",
+    text:"Uma tábua cede sob o peso, e vocês escorregam, se segurando nas cordas laterais com o coração na garganta. Machucados, mas inteiros, conseguem se arrastar até o outro lado.",
+    onEnter:(st) => { st.yudi.hp = Math.max(1, st.yudi.hp - 6); st.karol.hp = Math.max(1, st.karol.hp - 6); },
+    choices:[ { label:"Seguir em frente, doloridos", next:"guardiao_pantano" } ]
+  },
+
+  guardiao_pantano:{
+    loc:"loc_pantano", tag:"Combate Final do Ato", type:"combat",
+    text:"Bloqueando o caminho até a fronteira da costa, uma figura enorme se ergue da água parada — musgo, chifres de galho seco, e uma presença que faz o ar ficar mais pesado. O Guardião do Pântano não parece disposto a deixar vocês passarem sem provar sua força.",
+    combat:{ enemyName:"Guardião do Pântano", enemyHp:46, enemyAtkMin:7, enemyAtkMax:13, enemyDef:14, enemyAcc:7, win:"despertar_poder" }
+  },
+
+  /* --- ACAMPAMENTO FINAL --- */
+  despertar_poder:{
+    loc:"loc_pantano", tag:"Capítulo 4 — Algo Desperta",
+    text:"O Guardião desmorona em pedra e musgo, e por um instante vocês dois ficam parados, respirando fundo, sentindo algo diferente por dentro — como se aquele combate tivesse destravado uma força que já existia, só esperando a hora certa.\n\nYudi sente isso nas mãos, um jeito novo de golpear. Karol sente na respiração, um controle mais fino sobre o próprio corpo. Vocês aprenderam algo novo um com o outro.",
+    onEnter:(st) => { st.yudi.unlockedCount = 3; st.karol.unlockedCount = 3; },
+    choices:[ { label:"Seguir para o acampamento", next:"acampamento_fronteira" } ]
+  },
+  acampamento_fronteira:{
+    loc:"loc_acampamento", tag:"Capítulo 4 — Fronteira da Costa",
+    text:"Vocês montam acampamento numa clareira alta, de onde já se avista, bem longe, uma faixa escura de mar. O fogo crepita baixinho entre vocês dois, e pela primeira vez em dias, não há pressa nenhuma.",
+    choices:[
+      { label:"Perguntar o que Karol mais sente falta de casa", next:"fogueira_saudade_karol" },
+      { label:"Perguntar o que Yudi mais sente falta de casa", next:"fogueira_saudade_yudi" },
+      { label:"Conversar sobre o que fariam se tudo isso acabasse amanhã", next:"fogueira_futuro" },
+      { label:"Ficar só olhando o fogo, em silêncio confortável", next:"fogueira_silencio" },
+      { label:"Prometer um ao outro que vão terminar essa jornada juntos", next:"fim_ato1" }
+    ]
+  },
+  fogueira_saudade_karol:{
+    loc:"loc_acampamento", tag:"Capítulo 4 — Fronteira da Costa",
+    text:"Karol pensa um pouco antes de responder. \"Do barulho da nossa rua de manhã, eu acho. Uma bobagem, mas é disso que eu sinto falta.\" Yudi sorri, guardando aquilo com carinho.",
+    choices:[ { label:"Voltar à conversa", next:"acampamento_fronteira" } ]
+  },
+  fogueira_saudade_yudi:{
+    loc:"loc_acampamento", tag:"Capítulo 4 — Fronteira da Costa",
+    text:"Yudi olha pro fogo antes de responder. \"Da nossa cama, sinceramente. Simples assim.\" Karol ri baixinho, encostando a cabeça no ombro dele.",
+    choices:[ { label:"Voltar à conversa", next:"acampamento_fronteira" } ]
+  },
+  fogueira_futuro:{
+    loc:"loc_acampamento", tag:"Capítulo 4 — Fronteira da Costa",
+    text:"Nenhum dos dois tem uma resposta pronta, e por um instante ficam só imaginando: uma casa sem pressa de sair, dias comuns, o Véu como uma história antiga pra contar depois. Parece bom demais pra apressar.",
+    choices:[ { label:"Voltar à conversa", next:"acampamento_fronteira" } ]
+  },
+  fogueira_silencio:{
+    loc:"loc_acampamento", tag:"Capítulo 4 — Fronteira da Costa",
+    text:"Às vezes não precisa de palavra nenhuma. O fogo estala, o vento passa, e a presença um do outro já é resposta suficiente pra qualquer pergunta que nenhum dos dois fez em voz alta.",
+    choices:[ { label:"Voltar à conversa", next:"acampamento_fronteira" } ]
+  },
+  fim_ato1:{
+    loc:"loc_acampamento", tag:"Fim do Ato I",
+    text:"— FIM DO ATO I: O CHAMADO —\n\nVocês têm em mãos a primeira das três Relíquias do Coração, cicatrizes novas, e uma certeza que nenhum Véu do mundo vai apagar. Lá longe, a costa espera, com a Vila dos Faróis e a segunda relíquia escondida em algum lugar entre as ondas.",
+    choices:[ { label:"Começar o Ato II — A Vila dos Faróis", next:"inicio_ato2" } ]
+  },
+
+  /* ============================================================
+     ATO II — A VILA DOS FARÓIS
+     ============================================================ */
+  inicio_ato2:{
+    loc:"loc_costeira", tag:"Ato II — A Vila dos Faróis",
+    text:"Vocês caminham por dias acompanhando a linha da costa, o som do mar cada vez mais presente. Na tarde do terceiro dia, avistam ao longe uma torre alta e branca, piscando mesmo sob o sol: um farol. Ao redor dele, um punhado de casas de pescadores forma a Vila dos Faróis.",
+    choices:[ { label:"Descer até a vila", next:"chegada_farois" } ]
+  },
+  chegada_farois:{
+    loc:"loc_vilafarois", tag:"Ato II — A Vila dos Faróis",
+    text:"A vila cheira a sal e peixe fresco, mas alguma coisa está errada: os pescadores consertam redes em silêncio absoluto, sem trocar uma palavra, sem sorrir pros próprios filhos brincando por perto. No cais, um homem de barba branca observa vocês chegarem com curiosidade — o único que parece realmente presente ali.",
+    choices:[ { label:"Falar com ele", next:"capitao_bento" } ]
+  },
+  capitao_bento:{
+    loc:"loc_vilafarois", tag:"Capitão Bento",
+    text:"\"Capitão Bento\", ele se apresenta, apertando a mão dos dois com força de quem ainda trabalha todo santo dia. \"Vejo que não são daqui. O que os traz pra essas bandas?\"",
+    choices:[
+      { label:"\"O que está acontecendo com a vila?\"", next:"bento_veu" },
+      { label:"\"Sabe algo sobre uma relíquia escondida por aqui?\"", next:"bento_reliquia" },
+      { label:"\"Como chegamos ao Naufrágio do Áurea?\"", next:"bento_naufragio" },
+      { label:"\"Já ouviu falar de uma mensageira chamada Oriel?\"", next:"bento_oriel" },
+      { label:"\"Vamos direto ao ponto: precisamos de um barco\"", next:"escolha_rota_mar" }
+    ]
+  },
+  bento_veu:{
+    loc:"loc_vilafarois", tag:"Capitão Bento",
+    text:"Ele suspira, olhando pro cais. \"Começou faz uns dois meses. As pessoas continuam fazendo tudo que sempre fizeram, mas parece que esqueceram o porquê. Minha filha nem canta mais enquanto remenda as redes. Ela sempre cantou.\"",
+    choices:[ { label:"Perguntar mais", next:"capitao_bento" }, { label:"Ir direto pra questão do barco", next:"escolha_rota_mar" } ]
+  },
+  bento_reliquia:{
+    loc:"loc_vilafarois", tag:"Capitão Bento",
+    text:"Os olhos dele se estreitam. \"Relíquia... tem uma lenda antiga sobre um colar de pérolas que brilha sozinho, afundado junto com o Áurea há geração. Sempre achei conto de pescador, mas depois do que aconteceu com a vila, não duvido mais de nada.\"",
+    choices:[ { label:"Perguntar mais", next:"capitao_bento" }, { label:"Ir direto pra questão do barco", next:"escolha_rota_mar" } ]
+  },
+  bento_naufragio:{
+    loc:"loc_vilafarois", tag:"Capitão Bento",
+    text:"\"O Áurea afundou perto do Farol Afundado, num recife traiçoeiro. Dois jeitos de chegar lá: de barco, direto, ou a pé, pelas Grutas da Maré — só dá pra passar por elas na maré baixa, e olha que o caminho não é gentil.\"",
+    choices:[ { label:"Escolher como chegar até lá", next:"escolha_rota_mar" } ]
+  },
+  bento_oriel:{
+    loc:"loc_vilafarois", tag:"Capitão Bento",
+    text:"Ele pensa por um instante. \"Uma mulher encapuzada, que aparece e some como sombra de pássaro? Já vi de longe, uma vez, no topo do farol, antes de tudo isso começar. Nunca cheguei perto o bastante pra conversar.\"",
+    choices:[ { label:"Perguntar mais", next:"capitao_bento" }, { label:"Ir direto pra questão do barco", next:"escolha_rota_mar" } ]
+  },
+
+  escolha_rota_mar:{
+    loc:"loc_vilafarois", tag:"Ato II — Rumo ao Naufrágio",
+    text:"Capitão Bento aponta pro horizonte, onde a silhueta do Farol Afundado mal se distingue da névoa. \"Escolham: eu levo vocês de barco até lá, caminho mais calmo. Ou vão a pé pelas Grutas da Maré — mais rápido, bem mais arriscado.\"",
+    choices:[
+      { label:"Ir de barco com o Capitão Bento", next:"rota_barco" },
+      { label:"Atravessar a pé pelas Grutas da Maré", next:"rota_grutas" }
+    ]
+  },
+  rota_barco:{
+    loc:"loc_farol", tag:"Ato II — Farol Afundado",
+    text:"O barco corta a água calma sem pressa, o Capitão Bento cantarolando uma melodia baixinho — o único som de canto que vocês ouviram na vila inteira. Vocês desembarcam sãos e salvos ao pé do farol.",
+    choices:[ { label:"Subir até a entrada do farol", next:"dona_iracema" } ]
+  },
+  rota_grutas:{
+    loc:"loc_grutas", tag:"Ato II — Grutas da Maré",
+    text:"As grutas são escuras e estreitas, o teto baixo o bastante pra obrigar vocês a se curvarem. No meio do caminho, um estalar de cascas anuncia problema: um grupo de caranguejos gigantes, cascos brilhando com o mesmo tom violeta do Véu, bloqueia a passagem.",
+    choices:[ { label:"Lutar", next:"combate_caranguejos" } ]
+  },
+  combate_caranguejos:{
+    loc:"loc_grutas", tag:"Combate", type:"combat",
+    text:"As pinças estalam no escuro da gruta. Não dá pra passar sem enfrentar.",
+    combat:{ enemyName:"Caranguejos do Véu", enemyHp:26, enemyAtkMin:4, enemyAtkMax:8, enemyDef:11, enemyAcc:5, win:"dona_iracema" }
+  },
+
+  dona_iracema:{
+    loc:"loc_farol", tag:"Dona Iracema",
+    text:"A guardiã do farol é uma mulher de idade indefinida, olhos claros como vidro de garrafa, que os recebe sem espanto algum. \"Vocês vieram atrás do Áurea\", ela afirma, mais do que pergunta. \"Poucos chegam até aqui procurando outra coisa.\"",
+    choices:[
+      { label:"\"A senhora sabe o que é o Véu?\"", next:"iracema_veu" },
+      { label:"\"Há quanto tempo cuida desse farol?\"", next:"iracema_historia" },
+      { label:"\"Por que o farol está sempre aceso, mesmo de dia?\"", next:"iracema_farol" },
+      { label:"\"Consegue nos ajudar a chegar ao naufrágio?\"", next:"iracema_ajuda" },
+      { label:"\"Vamos seguir, obrigado pela atenção\"", next:"entrada_farol" }
+    ]
+  },
+  iracema_veu:{
+    loc:"loc_farol", tag:"Dona Iracema",
+    text:"\"Sei que ele odeia luz\", ela diz, simplesmente. \"Por isso mantenho o farol aceso, mesmo sem necessidade. Não impede o Véu de chegar, mas atrasa. E às vezes atrasar é o suficiente.\"",
+    choices:[ { label:"Perguntar mais", next:"dona_iracema" }, { label:"Seguir para a entrada secreta", next:"entrada_farol" } ]
+  },
+  iracema_historia:{
+    loc:"loc_farol", tag:"Dona Iracema",
+    text:"\"Minha família cuida desse farol há quatro gerações\", ela responde com orgulho quieto. \"Meu avô, meu pai, e agora eu. Um dia vai ser de outra pessoa. O farol continua, mesmo quando quem cuida dele muda.\"",
+    choices:[ { label:"Perguntar mais", next:"dona_iracema" }, { label:"Seguir para a entrada secreta", next:"entrada_farol" } ]
+  },
+  iracema_farol:{
+    loc:"loc_farol", tag:"Dona Iracema",
+    text:"Ela sorri de leve. \"Porque embaixo dele tem uma escada que só aparece quando a luz gira num certo padrão. Vocês vão precisar decifrar esse padrão pra descer até o túnel que leva ao mar aberto.\"",
+    choices:[ { label:"Perguntar mais", next:"dona_iracema" }, { label:"Seguir para a entrada secreta", next:"entrada_farol" } ]
+  },
+  iracema_ajuda:{
+    loc:"loc_farol", tag:"Dona Iracema",
+    text:"Ela tira do bolso do avental uma pedra lisa e escura, gelada ao toque. \"Isso ajuda a enxergar no escuro do túnel. Levem com vocês.\"",
+    onEnter:(st) => { addItem(st.karol, "Pedra-Luz de Iracema"); },
+    choices:[ { label:"Agradecer e seguir para a entrada secreta", next:"entrada_farol" } ]
+  },
+
+  entrada_farol:{
+    loc:"loc_farol", tag:"A Escada Secreta", type:"check",
+    text:"Na base do farol, Dona Iracema mostra o mecanismo antigo da luz giratória. É preciso decifrar o padrão certo de giros pra revelar a escada escondida embaixo da torre.",
+    check:{ stat:"magia", dc:13, label:"Teste de Magia — decifrar o padrão de luz", success:"farol_sucesso", fail:"farol_falha" }
+  },
+  farol_sucesso:{
+    loc:"loc_farol", tag:"A Escada Secreta",
+    text:"O padrão se revela quase óbvio assim que vocês param pra realmente prestar atenção nele. A escada desliza pra fora da parede sem barulho algum, revelando um túnel de pedra descendo em espiral.",
+    choices:[ { label:"Descer", next:"tunel_maritimo" } ]
+  },
+  farol_falha:{
+    loc:"loc_farol", tag:"A Escada Secreta",
+    text:"Vocês giram o mecanismo na ordem errada por duas vezes, e um estalo seco ecoa pela torre — algo, em algum lugar lá embaixo, acorda antes da hora. A escada aparece de qualquer forma, rangendo mais do que deveria.",
+    choices:[ { label:"Descer, já alertas", next:"tunel_maritimo" } ]
+  },
+  tunel_maritimo:{
+    loc:"loc_farol", tag:"O Túnel Marítimo",
+    text:"O túnel desce até ficar úmido e salgado, água pingando das paredes. No fim dele, um bando de enguias fosforescentes, maiores do que deveriam existir, se enrola no caminho, bloqueando a passagem até o mar aberto.",
+    choices:[ { label:"Lutar", next:"combate_enguias" } ]
+  },
+  combate_enguias:{
+    loc:"loc_farol", tag:"Combate", type:"combat",
+    text:"As enguias avançam em espiral, rápidas demais pra ignorar.",
+    combat:{ enemyName:"Enguias do Véu", enemyHp:24, enemyAtkMin:4, enemyAtkMax:8, enemyDef:12, enemyAcc:6, win:"camara_naufragio" }
+  },
+  camara_naufragio:{
+    loc:"loc_naufragio", tag:"O Naufrágio do Áurea",
+    text:"O túnel desemboca numa câmara alagada, iluminada por uma luz azul-esverdeada vinda de lugar nenhum. No centro, os destroços do Áurea se abraçam ao chão marinho, e sobre o que sobrou do convés, um colar de pérolas brilha sozinho — o Colar de Sal e Lua.\n\nMas ele não está desprotegido: uma figura feita de água e luz se ergue diante dos destroços, humanoide só na forma.",
+    choices:[ { label:"Aproximar-se", next:"guardia_ondas" } ]
+  },
+  guardia_ondas:{
+    loc:"loc_naufragio", tag:"A Guardiã das Ondas",
+    text:"A Guardiã das Ondas fala numa voz que soa como maré enchendo. \"O que se perde no fundo do mar, mas nunca deixa de existir? O que uma tempestade não consegue apagar, mesmo depois de anos?\"",
+    choices:[
+      { label:"\"Uma lembrança.\"", next:"onda_certa" },
+      { label:"\"Um tesouro.\"", next:"onda_errada" },
+      { label:"\"Um navio.\"", next:"onda_errada" },
+      { label:"Pedir pra ela repetir o enigma", next:"ondas_repete" },
+      { label:"Tentar nadar até o colar sem responder", next:"ondas_forcar" }
+    ]
+  },
+  ondas_repete:{
+    loc:"loc_naufragio", tag:"A Guardiã das Ondas",
+    text:"A água que forma o corpo dela treme, mas ela repete, paciente: \"O que se perde no fundo do mar, mas nunca deixa de existir? O que uma tempestade não consegue apagar, mesmo depois de anos?\"",
+    choices:[
+      { label:"\"Uma lembrança.\"", next:"onda_certa" },
+      { label:"\"Um tesouro.\"", next:"onda_errada" },
+      { label:"\"Um navio.\"", next:"onda_errada" },
+      { label:"Tentar nadar até o colar sem responder", next:"ondas_forcar" }
+    ]
+  },
+  ondas_forcar:{
+    loc:"loc_naufragio", tag:"A Guardiã das Ondas",
+    text:"A Guardiã se ergue numa onda súbita, bloqueando qualquer caminho até o colar. \"Ninguém leva o que não compreende\", ela diz, e a água ao redor dela começa a girar, cada vez mais rápido.",
+    choices:[ { label:"Lutar", next:"combate_guardia_ondas" } ]
+  },
+  onda_certa:{
+    loc:"loc_naufragio", tag:"A Guardiã das Ondas",
+    text:"A forma dela se acalma, as ondas ao redor baixando devagar. \"Correto\", ela diz, quase suave. \"Peguem o que restou. Ele sempre esperou por alguém que entendesse a resposta.\"",
+    choices:[ { label:"Pegar o Colar de Sal e Lua", next:"relíquia2" } ]
+  },
+  onda_errada:{
+    loc:"loc_naufragio", tag:"A Guardiã das Ondas",
+    text:"A Guardiã balança a cabeça, decepcionada, e a água ao redor dela começa a girar mais rápido, formando uma espécie de redemoinho ameaçador.",
+    choices:[ { label:"Lutar", next:"combate_guardia_ondas" } ]
+  },
+  combate_guardia_ondas:{
+    loc:"loc_naufragio", tag:"Combate Final do Ato", type:"combat",
+    text:"A Guardiã das Ondas ataca em pura fúria líquida, cada golpe uma onda tentando arrastar vocês pro fundo.",
+    combat:{ enemyName:"Guardiã das Ondas", enemyHp:48, enemyAtkMin:6, enemyAtkMax:12, enemyDef:14, enemyAcc:7, win:"relíquia2" }
+  },
+  "relíquia2":{
+    loc:"loc_naufragio", tag:"A Segunda Relíquia",
+    text:"O Colar de Sal e Lua pesa quase nada nas mãos de vocês, as pérolas frias no início, mornas segundos depois, como se reconhecessem quem as segura. A câmara alagada começa a clarear, a luz azul-esverdeada suavizando.\n\nA figura de Oriel se projeta de novo, tênue, sorrindo dessa vez. \"Duas de três. A última Relíquia está bem mais longe — numa torre esquecida nas Montanhas do Norte. Descansem primeiro. Essa vocês vão merecer.\"",
+    onEnter:(st) => { st.flags.relic2 = true; },
+    choices:[ { label:"Voltar à superfície", next:"retorno_vila" } ]
+  },
+
+  retorno_vila:{
+    loc:"loc_vilafarois", tag:"Capítulo Final — Descanso na Vila",
+    text:"Capitão Bento os recebe de volta no cais, os olhos brilhando ao ver o colar. \"Vocês conseguiram mesmo\", ele murmura, quase sem acreditar. \"Fiquem por essa noite. É o mínimo que essa vila pode oferecer.\"",
+    choices:[
+      { label:"Karol cuida dos ferimentos de Yudi", next:"retorno_cuidar_yudi" },
+      { label:"Yudi cuida dos ferimentos de Karol", next:"retorno_cuidar_karol" },
+      { label:"Perguntar a Bento se a vila já está melhor", next:"retorno_pergunta_vila" },
+      { label:"Comprar suprimentos pra próxima etapa da viagem", next:"retorno_suprimentos" },
+      { label:"Só aproveitar uma noite tranquila, sem pressa", next:"despertar_poder2" }
+    ]
+  },
+  retorno_cuidar_yudi:{
+    loc:"loc_vilafarois", tag:"Capítulo Final — Descanso na Vila",
+    text:"Karol limpa um corte no braço de Yudi com toda calma do mundo, os dois sentados no cais, pés balançando sobre a água escura.",
+    onEnter:(st) => { st.yudi.hp = Math.min(st.yudi.maxHp, st.yudi.hp + 8); },
+    choices:[ { label:"Seguir para a noite de descanso", next:"despertar_poder2" } ]
+  },
+  retorno_cuidar_karol:{
+    loc:"loc_vilafarois", tag:"Capítulo Final — Descanso na Vila",
+    text:"Yudi enrola uma bandagem no ombro de Karol, tentando (e falhando) fazer isso sem fazer cócegas nela primeiro.",
+    onEnter:(st) => { st.karol.hp = Math.min(st.karol.maxHp, st.karol.hp + 8); },
+    choices:[ { label:"Seguir para a noite de descanso", next:"despertar_poder2" } ]
+  },
+  retorno_pergunta_vila:{
+    loc:"loc_vilafarois", tag:"Capítulo Final — Descanso na Vila",
+    text:"Bento olha ao redor, pensativo. \"Difícil dizer. Mas hoje, no jantar, ouvi minha filha cantarolando de novo, baixinho. Capaz que seja só o começo.\"",
+    choices:[ { label:"Seguir para a noite de descanso", next:"despertar_poder2" } ]
+  },
+  retorno_suprimentos:{
+    loc:"loc_vilafarois", tag:"Capítulo Final — Descanso na Vila",
+    text:"Vocês trocam algumas moedas restantes por mantimentos e mais uma poção de cura pra cada um, se preparando pra jornada até as Montanhas do Norte.",
+    onEnter:(st) => { addItem(st.yudi, "Poção de Cura"); addItem(st.karol, "Poção de Cura"); },
+    choices:[ { label:"Seguir para a noite de descanso", next:"despertar_poder2" } ]
+  },
+
+  despertar_poder2:{
+    loc:"loc_vilafarois", tag:"Algo Mais Desperta",
+    text:"Deitados olhando o teto da estalagem, exaustos mas inteiros, vocês dois sentem de novo aquela mudança silenciosa por dentro — mais funda dessa vez, depois de tudo que enfrentaram no fundo do mar. Uma técnica nova, pronta pra quando for precisa.",
+    onEnter:(st) => { st.yudi.unlockedCount = 4; st.karol.unlockedCount = 4; },
+    choices:[ { label:"Ir até o cais, antes de dormir", next:"doca_final" } ]
+  },
+  doca_final:{
+    loc:"loc_vilafarois", tag:"Capítulo Final — O Cais, à Noite",
+    text:"Vocês dois se sentam na ponta do cais, pernas balançando sobre a água escura, o farol girando devagar atrás de vocês. O céu está limpo o bastante pra ver estrelas de verdade, sem nenhum resquício daquele violeta estranho.",
+    choices:[
+      { label:"Perguntar o que mudou desde que tudo isso começou", next:"cais_mudanca" },
+      { label:"Prometer visitar a Vila dos Faróis de novo, um dia", next:"cais_promessa" },
+      { label:"Comentar sobre a terceira relíquia, nas Montanhas do Norte", next:"cais_terceira" },
+      { label:"Ficar só admirando as estrelas, em silêncio", next:"cais_silencio" },
+      { label:"Encerrar a noite e seguir juntos pro próximo capítulo", next:"fim_ato2" }
+    ]
+  },
+  cais_mudanca:{
+    loc:"loc_vilafarois", tag:"Capítulo Final — O Cais, à Noite",
+    text:"\"Acho que a gente discute menos bobagem\", Karol brinca. Yudi ri, mas concorda de verdade — dá pra sentir o quanto os dois pararam de dar as coisas por garantidas, em algum ponto dessa estrada toda.",
+    choices:[ { label:"Voltar à conversa", next:"doca_final" } ]
+  },
+  cais_promessa:{
+    loc:"loc_vilafarois", tag:"Capítulo Final — O Cais, à Noite",
+    text:"\"Um dia, sem pressa nenhuma, sem Véu, sem relíquia\", Yudi promete, e Karol estende o mindinho pra selar isso como quem faz uma promessa boba de infância. Funciona do mesmo jeito.",
+    choices:[ { label:"Voltar à conversa", next:"doca_final" } ]
+  },
+  cais_terceira:{
+    loc:"loc_vilafarois", tag:"Capítulo Final — O Cais, à Noite",
+    text:"As Montanhas do Norte são só um nome distante por enquanto, mas os dois já sabem: vai ser frio, vai ser difícil, e vão encarar do mesmo jeito que encararam tudo até aqui — juntos, sem realmente outra opção em mente.",
+    choices:[ { label:"Voltar à conversa", next:"doca_final" } ]
+  },
+  cais_silencio:{
+    loc:"loc_vilafarois", tag:"Capítulo Final — O Cais, à Noite",
+    text:"Nenhum dos dois diz nada por um bom tempo. O farol gira, a água bate de leve contra os pilares do cais, e essa quietude não pesa nadinha — é só mais um jeito de estarem juntos.",
+    choices:[ { label:"Voltar à conversa", next:"doca_final" } ]
+  },
+  fim_ato2:{
+    loc:"loc_vilafarois", tag:"Fim do Ato II", type:"end",
+    text:"— FIM DO ATO II: A VILA DOS FARÓIS —\n\nDuas Relíquias do Coração já são de vocês. O Véu ainda avança em algum lugar longe dali, mas a Vila dos Faróis volta, aos poucos, a cantar. A última relíquia espera numa torre esquecida, no topo das Montanhas do Norte — e com ela, o fim (ou o verdadeiro começo) dessa jornada.\n\nO Ato III chega quando vocês pedirem. Até lá, essa é a aventura de vocês dois.",
+    choices:[]
+  }
+};
+
+/* ================= ESTADO / SAVE ================= */
+const SAVE_KEY = "cronicasDoVeuSaveV2";
+let state = null;
+
+function newCharacter(){
+  return { stats:{ forca:2, destreza:2, magia:2 }, hp:22, maxHp:22, inventory:[], unlockedCount:2 };
+}
+function newState(){
+  return {
+    node:"start",
+    classYudi:null, classKarol:null,
+    yudi: newCharacter(),
+    karol: newCharacter(),
+    flags:{},
+    visited:["loc_solvenna"]
+  };
+}
+function saveState(){ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }
+function loadState(){ try { const raw = JSON.parse(localStorage.getItem(SAVE_KEY)); return raw && STORY[raw.node] && raw.yudi && raw.karol ? raw : null; } catch { return null; } }
+function addItem(character, item){ character.inventory.push(item); }
+
+/* ================= TELA DE TÍTULO ================= */
+const existing = loadState();
+if(existing){ document.getElementById('btn-continue').style.display = 'inline-block'; }
+
+document.getElementById('btn-new-game').addEventListener('click', () => {
+  if(loadState() && !confirm('Recomeçar a aventura e substituir o progresso salvo?')) return;
+  state = newState();
+  goToScreen('create');
+  buildClassGrids();
+});
+document.getElementById('btn-continue').addEventListener('click', () => {
+  state = loadState();
+  goToScreen('game');
+  renderAll();
+});
+function goToScreen(name){
+  document.getElementById('screen-title').style.display = name === 'title' ? 'block' : 'none';
+  document.getElementById('screen-create').style.display = name === 'create' ? 'block' : 'none';
+  document.getElementById('screen-game').style.display = name === 'game' ? 'block' : 'none';
+}
+
+/* ================= CRIAÇÃO DE PERSONAGEM ================= */
+function buildClassGrids(){
+  buildClassGrid('class-grid-yudi', 'classYudi');
+  buildClassGrid('class-grid-karol', 'classKarol');
+}
+function buildClassGrid(gridId, stateKey){
+  const grid = document.getElementById(gridId);
+  grid.innerHTML = CLASSES.map(c => `
+    <button class="class-card" data-class="${c.id}">
+      <div class="cc-icon">${c.icon}</div>
+      <h4>${c.nome}</h4>
+      <p>${c.desc}</p>
+    </button>
+  `).join('');
+  grid.querySelectorAll('.class-card').forEach(card => {
+    card.addEventListener('click', () => {
+      grid.querySelectorAll('.class-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      state[stateKey] = card.dataset.class;
+    });
+  });
+}
+document.getElementById('btn-start-adventure').addEventListener('click', () => {
+  if(!state.classYudi || !state.classKarol){
+    alert('Escolham uma classe pra cada um antes de seguir.');
+    return;
+  }
+  applyClassBonus(state.yudi, state.classYudi);
+  applyClassBonus(state.karol, state.classKarol);
+  saveState();
+  goToScreen('game');
+  renderAll();
+});
+function applyClassBonus(character, classId){
+  const c = CLASSES.find(x => x.id === classId);
+  character.stats.forca += (c.bonus.forca || 0);
+  character.stats.destreza += (c.bonus.destreza || 0);
+  character.stats.magia += (c.bonus.magia || 0);
+  character.maxHp += (c.bonus.hp || 0);
+  character.hp = character.maxHp;
+}
+
+/* ================= SUBNAV ================= */
+document.querySelectorAll('.subnav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.subnav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.panel-view').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + btn.dataset.panel).classList.add('active');
+    if(btn.dataset.panel === 'mapa') renderMap();
+    if(btn.dataset.panel === 'ficha') renderSheet();
+  });
+});
+
+function renderAll(){
+  renderHud();
+  renderNode();
+  renderMap();
+  renderSheet();
+}
+
+/* ================= HUD ================= */
+function renderHud(){
+  const loc = MAP_LOCATIONS.find(l => l.id === (STORY[state.node] ? STORY[state.node].loc : state.visited[state.visited.length-1]));
+  document.getElementById('hud-bar').innerHTML = `
+    <div class="hud-hero">🧑 Yudi <div class="track"><div class="fill" style="width:${(state.yudi.hp/state.yudi.maxHp*100)}%"></div></div> ${state.yudi.hp}/${state.yudi.maxHp}</div>
+    <div class="hud-loc">${loc ? loc.icon + ' ' + loc.nome : ''}</div>
+    <div class="hud-hero">👩 Karol <div class="track"><div class="fill" style="width:${(state.karol.hp/state.karol.maxHp*100)}%"></div></div> ${state.karol.hp}/${state.karol.maxHp}</div>
+  `;
+}
+
+/* ================= RENDER NÓ DA HISTÓRIA ================= */
+function renderNode(){
+  const node = STORY[state.node];
+  state.entered ||= {};
+  if(node.onEnter && !state.entered[state.node]){ node.onEnter(state); state.entered[state.node]=true; }
+  window.dispatchEvent(new CustomEvent('rpg-node',{detail:{node,id:state.node}}));
+  if(node.loc && !state.visited.includes(node.loc)) state.visited.push(node.loc);
+  saveState();
+  renderHud();
+
+  const panel = document.getElementById('node-panel');
+  panel.classList.remove('room-enter');void panel.offsetWidth;panel.classList.add('room-enter');
+  let html = `<div class="node-tag">${node.tag}</div><div class="node-text">${node.text}</div>`;
+
+  if(node.type === 'check'){
+    html += `
+      <div class="check-box">
+        <div class="check-label">${node.check.label} (dificuldade ${node.check.dc})</div>
+        <div class="check-pick" id="check-pick">
+          <button class="check-pick-btn" data-who="yudi">Yudi tenta (${statBonusLabel(state.yudi, node.check)})</button>
+          <button class="check-pick-btn" data-who="karol">Karol tenta (${statBonusLabel(state.karol, node.check)})</button>
+        </div>
+        <div class="dice" id="dice-face" style="display:none;">?</div>
+        <div class="roll-result" id="roll-result">&nbsp;</div>
+      </div>
+    `;
+    panel.innerHTML = html;
+    panel.querySelectorAll('.check-pick-btn').forEach(btn => {
+      btn.addEventListener('click', () => rollCheck(node.check, btn.dataset.who));
+    });
+    return;
+  }
+
+  if(node.type === 'combat'){
+    panel.innerHTML = html + `<div class="combat-box" id="combat-box"></div>`;
+    startCombat(node.combat);
+    return;
+  }
+
+
+
+  if(node.type === 'end'){
+    html += `<div style="text-align:center; margin-top:2rem;"><button class="rpg-btn ghost" id="btn-restart-adv">recomeçar a aventura</button></div>`;
+    panel.innerHTML = html;
+    document.getElementById('btn-restart-adv').addEventListener('click', () => {
+      localStorage.removeItem(SAVE_KEY);
+      state = null;
+      goToScreen('title');
+      document.getElementById('btn-continue').style.display = 'none';
+    });
+    return;
+  }
+
+  html += `<div class="choices">${node.choices.map(ch => `<button class="choice-btn" data-next="${ch.next}"><span class="arrow">&raquo;</span>${ch.label}</button>`).join('')}</div>`;
+  panel.innerHTML = html;
+  panel.querySelectorAll('.choice-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.node = btn.dataset.next;
+      renderNode();
+      renderMap();
+      renderSheet();
+    });
+  });
+}
+
+function statBonusLabel(character, check){
+  let mod = character.stats[check.stat] || 0;
+  if(check.itemBonus && character.inventory.includes(check.itemBonus.item)) mod += check.itemBonus.value;
+  return (mod >= 0 ? '+' : '') + mod;
+}
+
+/* ================= TESTE DE ATRIBUTO ================= */
+let checkRolling=false;
+function rollCheck(check, who){
+  if(checkRolling)return;checkRolling=true;
+  document.getElementById('check-pick').style.display = 'none';
+  const diceEl = document.getElementById('dice-face');
+  const resultEl = document.getElementById('roll-result');
+  diceEl.style.display = 'flex';
+  diceEl.classList.add('rolling');
+  const character = state[who];
+  let mod = character.stats[check.stat] || 0;
+  let itemNote = '';
+  if(check.itemBonus && character.inventory.includes(check.itemBonus.item)){
+    mod += check.itemBonus.value;
+    itemNote = ` (incluindo bônus de ${check.itemBonus.item})`;
+  }
+  let ticks = 0;
+  const spin = setInterval(() => {
+    diceEl.textContent = 1 + Math.floor(Math.random()*20);
+    ticks++;
+    if(ticks > 10){
+      clearInterval(spin);
+      diceEl.classList.remove('rolling');
+      const roll = 1 + Math.floor(Math.random()*20);
+      diceEl.textContent = roll;
+      const total = roll + mod;
+      const success = total >= check.dc;
+      const nome = who === 'yudi' ? 'Yudi' : 'Karol';
+      resultEl.textContent = `${nome} rolou ${roll} + ${mod} de bônus${itemNote} = ${total} (precisava de ${check.dc}) — ${success ? 'sucesso!' : 'falhou.'}`;
+      setTimeout(() => {
+        checkRolling=false;
+        state.node = success ? check.success : check.fail;
+        renderNode();
+        renderMap();
+        renderSheet();
+      }, 1500);
+    }
+  }, 70);
+}
+
+/* ================= COMBATE (habilidades próprias, esquiva, morte e reanimação) ================= */
+let combatState = null;
+
+function startCombat(cfg){
+  if(state.savedCombat?.node===state.node){combatState=state.savedCombat.data;renderCombat();if(combatState.ended){if(combatState.enemyHp<=0){setTimeout(()=>{state.node=cfg.win;renderAll()},500)}else showDefeatScreen()}else maybeAdvanceRound();return;}
+  combatState = {
+    cfg, enemyHp: cfg.enemyHp, enemyMaxHp: cfg.enemyHp,
+    log:[`O combate contra ${cfg.enemyName} começou!`],
+    yudiActed:false, karolActed:false,
+    shield:{ yudi:false, karol:false },
+    tempAtkBonus:0,
+    enemyDefMod:0,
+    downed:{ yudi:false, karol:false },
+    dead:{ yudi:false, karol:false },
+    deathSaves:{ yudi:{ok:0,fail:0}, karol:{ok:0,fail:0} },
+    ended:false
+  };
+  renderCombat();
+}
+
+function heroClass(who){
+  const classId = who === 'yudi' ? state.classYudi : state.classKarol;
+  return CLASSES.find(c => c.id === classId);
+}
+
+function renderCombat(){
+  state.savedCombat={node:state.node,data:combatState};saveState();
+  const box = document.getElementById('combat-box');
+  const { cfg, enemyHp, enemyMaxHp, log } = combatState;
+
+  box.innerHTML = `
+    <div class="enemy-card">
+      <h4>${cfg.enemyName}</h4>
+      <div class="hp-track"><div class="hp-fill" style="width:${Math.max(0,(enemyHp/enemyMaxHp*100))}%"></div></div>
+      <div class="hp-label">${Math.max(enemyHp,0)}/${enemyMaxHp} HP</div>
+    </div>
+    <div class="heroes-combat">
+      ${heroCombatCard('yudi', 'Yudi', state.yudi)}
+      ${heroCombatCard('karol', 'Karol', state.karol)}
+    </div>
+    <div class="combat-log" id="combat-log">${log.map(l => `<div>${l}</div>`).join('')}</div>
+  `;
+  window.dispatchEvent(new CustomEvent('rpg-battle',{detail:{hp:combatState.enemyHp,name:combatState.cfg.enemyName}}));
+  const logEl = document.getElementById('combat-log');
+  logEl.scrollTop = logEl.scrollHeight;
+
+  box.querySelectorAll('[data-ability]').forEach(btn => btn.addEventListener('click', () => useAbility(btn.dataset.who, btn.dataset.ability)));
+  box.querySelectorAll('[data-pot]').forEach(btn => btn.addEventListener('click', () => combatUsePotion(btn.dataset.pot)));
+  box.querySelectorAll('[data-revive]').forEach(btn => btn.addEventListener('click', () => combatRevive(btn.dataset.revive)));
+}
+
+function heroCombatCard(key, nome, character){
+  if(combatState.ended) {
+    // trava tudo depois do fim
+  }
+  const isDead = combatState.dead[key];
+  const isDowned = combatState.downed[key];
+  const alive = !isDowned && !isDead;
+  const acted = combatState[key + 'Acted'];
+  const otherKey = key === 'yudi' ? 'karol' : 'yudi';
+  const otherDowned = combatState.downed[otherKey] && !combatState.dead[otherKey];
+  const otherAlive = !combatState.downed[otherKey] && !combatState.dead[otherKey];
+
+  let statusLine = '';
+  if(isDead) statusLine = `<div class="hero-status">☠️ caído — precisa ser reanimado(a)</div>`;
+  else if(isDowned) statusLine = `<div class="hero-status">💫 inconsciente</div>`;
+
+  let pips = '';
+  if(isDowned || isDead){
+    const ds = combatState.deathSaves[key];
+    pips = `<div class="death-pips">
+      ${[0,1,2].map(i => `<span class="death-pip ${i < ds.fail ? 'fail' : ''} ${i < ds.ok ? 'success' : ''}"></span>`).join('')}
+    </div>`;
+  }
+
+  let actionsHtml = '';
+  if(alive && !combatState.ended){
+    const cls = heroClass(key);
+    const abilityBtns = cls.abilities.slice(0, character.unlockedCount).map(ab => {
+      const disabled = acted ? 'disabled' : '';
+      const label = ab.tipo === 'buff' ? 'apoio' : (ab.tipo === 'escudo' ? 'defesa' : (ab.tipo === 'debuff' ? 'fraqueza' : `+${ab.stat.slice(0,3)}`));
+      return `<button class="ability-btn" data-who="${key}" data-ability="${ab.id}" ${disabled}>
+        <span>${ab.icon} ${ab.nome}</span><span class="ab-acc">${label}</span>
+      </button>`;
+    }).join('');
+    const hasPotion = character.inventory.includes('Poção de Cura') && character.hp < character.maxHp;
+    const potionBtn = (hasPotion && !acted) ? `<button class="rpg-btn ghost small" data-pot="${key}">🧪 usar poção</button>` : '';
+    const reviveBtn = (otherDowned && !acted) ? `<button class="rpg-btn revive-btn" data-revive="${otherKey}">✨ reanimar ${otherKey === 'yudi' ? 'Yudi' : 'Karol'}</button>` : '';
+    actionsHtml = `<div class="hc-actions">${abilityBtns}${potionBtn}${reviveBtn}</div>`;
+  }
+
+  return `
+    <div class="hero-combat-card ${isDowned ? 'downed' : ''} ${isDead ? 'dead' : ''}">
+      <h5>${nome} ${combatState.shield[key] ? '🔷' : ''}</h5>
+      <div class="hp-track"><div class="hp-fill party" style="width:${(character.hp/character.maxHp*100)}%"></div></div>
+      <div class="hp-label">${character.hp}/${character.maxHp} HP</div>
+      ${statusLine}
+      ${pips}
+      ${actionsHtml}
+    </div>
+  `;
+}
+
+function useAbility(who, abilityId){
+  if(!['yudi','karol'].includes(who)||combatState.ended||combatState[who+'Acted']||combatState.downed[who]||combatState.dead[who])return;
+  const character = state[who];
+  const cls = heroClass(who);
+  const ability = cls.abilities.find(a => a.id === abilityId);
+  if(!ability || !cls.abilities.slice(0,character.unlockedCount).includes(ability))return;
+  const nome = who === 'yudi' ? 'Yudi' : 'Karol';
+  const { cfg } = combatState;
+
+  if(ability.tipo === 'buff'){
+    combatState.tempAtkBonus = 4;
+    combatState.log.push(`${nome} usou ${ability.nome}! O próximo ataque do casal recebe +4.`);
+  } else if(ability.tipo === 'escudo'){
+    combatState.shield[who] = true;
+    combatState.log.push(`${nome} usou ${ability.nome}. O próximo dano recebido será reduzido pela metade.`);
+  } else if(ability.tipo === 'debuff'){
+    combatState.enemyDefMod -= 3;
+    combatState.log.push(`${nome} usou ${ability.nome}! A defesa de ${cfg.enemyName} caiu em 3 pelo resto do combate.`);
+  } else {
+    const hits = ability.hits || 1;
+    let totalDmg = 0;
+    const effDef = cfg.enemyDef + (combatState.enemyDefMod || 0);
+    for(let h=0; h<hits; h++){
+      const mod = character.stats[ability.stat] || 0;
+      const bonus = combatState.tempAtkBonus;
+      const roll = 1 + Math.floor(Math.random()*20);
+      const total = roll + mod + ability.acc + bonus;
+      if(bonus) combatState.tempAtkBonus = 0;
+      if(total >= effDef){
+        const dmg = ability.dmgMin + Math.floor(Math.random()*(ability.dmgMax - ability.dmgMin + 1));
+        totalDmg += dmg;
+        combatState.log.push(`${nome} usa ${ability.nome}: rolou ${roll}${bonus ? '+'+bonus+' bônus' : ''} (+${mod+ability.acc}) = ${total}. Acertou! ${dmg} de dano.`);
+      } else {
+        combatState.log.push(`${nome} usa ${ability.nome}: rolou ${roll}${bonus ? '+'+bonus+' bônus' : ''} (+${mod+ability.acc}) = ${total}. Errou.`);
+      }
+    }
+    combatState.enemyHp -= totalDmg;
+  }
+
+  combatState[who + 'Acted'] = true;
+
+  if(combatState.enemyHp <= 0){
+    combatState.ended = true;
+    combatState.log.push(`${cfg.enemyName} foi derrotado!`);
+    renderCombat();
+    setTimeout(() => { state.node = cfg.win; renderNode(); renderMap(); renderSheet(); }, 1300);
+    return;
+  }
+
+  renderCombat();
+  maybeAdvanceRound();
+}
+
+function combatRevive(targetKey){
+  const who = targetKey === 'yudi' ? 'karol' : 'yudi';
+  const reviver = state[who];
+  const nome = who === 'yudi' ? 'Yudi' : 'Karol';
+  const targetNome = targetKey === 'yudi' ? 'Yudi' : 'Karol';
+  const mod = Math.max(reviver.stats.magia, reviver.stats.forca, reviver.stats.destreza);
+  const roll = 1 + Math.floor(Math.random()*20);
+  const total = roll + mod;
+
+  if(total >= 13){
+    const target = state[targetKey];
+    target.hp = Math.ceil(target.maxHp * 0.4);
+    combatState.downed[targetKey] = false;
+    combatState.deathSaves[targetKey] = {ok:0, fail:0};
+    combatState.log.push(`${nome} rolou ${roll} (+${mod}) = ${total}. Conseguiu reanimar ${targetNome}!`);
+  } else {
+    combatState.log.push(`${nome} rolou ${roll} (+${mod}) = ${total}. Tentou reanimar ${targetNome}, mas não conseguiu dessa vez.`);
+  }
+
+  combatState[who + 'Acted'] = true;
+  renderCombat();
+  maybeAdvanceRound();
+}
+
+let roundPending=false;
+function maybeAdvanceRound(){
+  if(combatState.ended) return;
+  const yudiOk = combatState.dead.yudi || combatState.downed.yudi || combatState.yudiActed;
+  const karolOk = combatState.dead.karol || combatState.downed.karol || combatState.karolActed;
+  if(yudiOk && karolOk && !roundPending){roundPending=true;setTimeout(()=>{roundPending=false;resolveRound()},700);}
+}
+
+function resolveRound(){
+  if(!combatState || combatState.ended)return;
+  const { cfg } = combatState;
+
+  // ataque do inimigo contra um vivo aleatório
+  const aliveKeys = ['yudi','karol'].filter(k => !combatState.downed[k] && !combatState.dead[k]);
+  if(aliveKeys.length > 0){
+    const target = aliveKeys[Math.floor(Math.random()*aliveKeys.length)];
+    const nome = target === 'yudi' ? 'Yudi' : 'Karol';
+    const enemyRoll = 1 + Math.floor(Math.random()*20) + (cfg.enemyAcc || 5);
+    const dodgeRoll = 1 + Math.floor(Math.random()*20);
+    const dodgeMod = state[target].stats.destreza || 0;
+    const dodgeTotal = dodgeRoll + dodgeMod;
+
+    if(dodgeTotal >= enemyRoll){
+      combatState.log.push(`${cfg.enemyName} ataca ${nome}, que esquiva! (${dodgeRoll}+${dodgeMod}=${dodgeTotal} vs ${enemyRoll})`);
+    } else {
+      let dmg = cfg.enemyAtkMin + Math.floor(Math.random()*(cfg.enemyAtkMax - cfg.enemyAtkMin + 1));
+      if(combatState.shield[target]){ dmg = Math.ceil(dmg/2); combatState.shield[target] = false; combatState.log.push(`O escudo de mana absorve parte do golpe.`); }
+      state[target].hp = Math.max(0, state[target].hp - dmg);
+      combatState.log.push(`${cfg.enemyName} acerta ${nome}! ${dmg} de dano. (${dodgeRoll}+${dodgeMod}=${dodgeTotal} vs ${enemyRoll}, não esquivou)`);
+      if(state[target].hp <= 0 && !combatState.downed[target]){
+        combatState.downed[target] = true;
+        combatState.log.push(`${nome} caiu inconsciente!`);
+      }
+    }
+  }
+
+  // testes de resistência pra quem está caído
+  ['yudi','karol'].forEach(k => {
+    if(combatState.downed[k] && !combatState.dead[k]){
+      const nome = k === 'yudi' ? 'Yudi' : 'Karol';
+      const roll = 1 + Math.floor(Math.random()*20);
+      if(roll >= 10){
+        combatState.deathSaves[k].ok++;
+        combatState.log.push(`${nome} resiste (rolou ${roll}). Estável por enquanto.`);
+      } else {
+        combatState.deathSaves[k].fail++;
+        combatState.log.push(`${nome} piora (rolou ${roll}).`);
+        if(combatState.deathSaves[k].fail >= 2){
+          combatState.dead[k] = true;
+          combatState.log.push(`${nome} não resistiu e caiu de vez nesse combate. Só será possível reanimar depois da batalha.`);
+        }
+      }
+    }
+  });
+
+  combatState.yudiActed = false;
+  combatState.karolActed = false;
+  saveState();
+  renderCombat();
+
+  const bothOut = (combatState.downed.yudi || combatState.dead.yudi) && (combatState.downed.karol || combatState.dead.karol);
+  if(bothOut){
+    combatState.ended = true;
+    combatState.log.push('Vocês dois foram derrotados...');
+    renderCombat();
+    setTimeout(showDefeatScreen, 1200);
+  }
+}
+
+function showDefeatScreen(){
+  const box = document.getElementById('combat-box');
+  box.innerHTML += `
+    <div style="text-align:center; margin-top:1.4rem; padding-top:1.4rem; border-top:1px dashed var(--line);">
+      <div class="node-tag" style="color:var(--red);">derrota</div>
+      <p style="font-size:0.85rem; color:rgba(236,224,196,0.7); margin-bottom:1.2rem;">Vocês recuam, feridos, e conseguem escapar antes que fosse tarde demais. Descansam o suficiente pra tentar de novo.</p>
+      <button class="rpg-btn" id="btn-retry-combat">tentar esse combate de novo</button>
+    </div>
+  `;
+  document.getElementById('btn-retry-combat').addEventListener('click', () => {
+    state.yudi.hp = state.yudi.maxHp;
+    state.karol.hp = state.karol.maxHp;
+    saveState();
+    delete state.savedCombat;
+    startCombat(combatState.cfg);
+  });
+}
+
+function combatUsePotion(who){
+  const character = state[who];
+  const idx = character.inventory.indexOf('Poção de Cura');
+  if(idx === -1) return;
+  character.inventory.splice(idx, 1);
+  character.hp = Math.min(character.maxHp, character.hp + 15);
+  const nome = who === 'yudi' ? 'Yudi' : 'Karol';
+  combatState.log.push(`${nome} usou uma Poção de Cura e recuperou 15 HP.`);
+  renderCombat();
+  saveState();
+}
+
+/* ================= MAPA ================= */
+function renderMap(){
+  const el = document.getElementById('map-path');
+  if(!el) return;
+  const currentLoc = STORY[state.node] ? STORY[state.node].loc : null;
+  el.innerHTML = MAP_LOCATIONS.map(loc => {
+    const visited = state.visited.includes(loc.id);
+    const isCurrent = loc.id === currentLoc;
+    return `
+      <div class="map-stop ${visited ? 'visited' : ''} ${isCurrent ? 'current' : ''}">
+        <div class="map-icon">${visited ? loc.icon : '❔'}</div>
+        <div class="map-info">
+          <h5>${visited ? loc.nome : '???'}</h5>
+          <p>${visited ? loc.desc : 'Local ainda não descoberto.'}</p>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ================= FICHA ================= */
+function renderSheet(){
+  const el = document.getElementById('sheet-grid');
+  if(!el) return;
+  el.innerHTML = [
+    sheetCard('Yudi', '🧑', state.classYudi, state.yudi),
+    sheetCard('Karol', '👩', state.classKarol, state.karol)
+  ].join('');
+}
+function sheetCard(nome, icon, classId, character){
+  const c = CLASSES.find(x => x.id === classId);
+  return `
+    <div class="sheet-card">
+      <h3>${icon} ${nome}</h3>
+      <div class="sheet-class">${c ? c.icon + ' ' + c.nome : ''}</div>
+      <div class="sheet-stat-row"><span>Vida</span><b>${character.hp}/${character.maxHp}</b></div>
+      <div class="sheet-stat-row"><span>Força</span><b>${character.stats.forca}</b></div>
+      <div class="sheet-stat-row"><span>Destreza</span><b>${character.stats.destreza}</b></div>
+      <div class="sheet-stat-row"><span>Magia</span><b>${character.stats.magia}</b></div>
+      <div class="sheet-inv">
+        <div class="sheet-inv-label">inventário</div>
+        ${character.inventory.length ? character.inventory.map(i => `<span class="sheet-inv-item">${i}</span>`).join('') : '<span class="sheet-inv-item">vazio</span>'}
+      </div>
+    </div>
+  `;
+}
+</script>
+<script src="rpg-world.js"></script><script src="rpg-cast.js"></script><script src="rpg-cast-view.js"></script>
+</body>
+</html>
