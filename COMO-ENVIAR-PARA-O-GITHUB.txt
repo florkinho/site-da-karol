@@ -10,6 +10,6 @@ Envie também todos os CSS, JavaScript e a pasta assets. Apenas os HTMLs não ba
 O index.html deve ficar diretamente na pasta publicada, não dentro de uma nova subpasta.
 Preserve os demais arquivos existentes no repositório.
 
-Esta versão inclui NPCs e chefes ilustrados no RPG, diálogos sem números no cenário, quebra-cabeça com montagem salva e guia Como jogar na investigação.
+Esta versão substitui a expansão anterior por Uma noite de lanternas: dez fotos originais, lanternas animadas e Pascal interativo. Inclui também seis casos de investigação (incluindo O arquivo da maré morta, nível perito), os três atos do RPG, Desenho às cegas com todas as cores, fazenda e os jogos anteriores. O jardim de lembranças e seu jogo de pares com fotos foram retirados.
 
 O progresso é salvo por navegador e endereço. O progresso do endereço chatgpt.site não é transferido automaticamente para o endereço do GitHub.

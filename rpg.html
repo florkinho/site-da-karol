@@ -247,6 +247,7 @@
 
 <footer>crônicas do véu &middot; ato I de uma saga em construção &middot; feito com carinho por Yudi &amp; Karol</footer>
 
+<script src="rpg-act3.js"></script>
 <script>
 /* ================= CLASSES ================= */
 const CLASSES = [
@@ -931,6 +932,8 @@ const STORY = {
   }
 };
 
+installActThree(STORY, MAP_LOCATIONS);
+
 /* ================= ESTADO / SAVE ================= */
 const SAVE_KEY = "cronicasDoVeuSaveV2";
 let state = null;
@@ -1047,6 +1050,7 @@ function renderHud(){
 /* ================= RENDER NÓ DA HISTÓRIA ================= */
 function renderNode(){
   const node = STORY[state.node];
+  if(node.branch){state.node=node.branch(state);renderNode();return;}
   state.entered ||= {};
   if(node.onEnter && !state.entered[state.node]){ node.onEnter(state); state.entered[state.node]=true; }
   window.dispatchEvent(new CustomEvent('rpg-node',{detail:{node,id:state.node}}));
@@ -1057,6 +1061,13 @@ function renderNode(){
   const panel = document.getElementById('node-panel');
   panel.classList.remove('room-enter');void panel.offsetWidth;panel.classList.add('room-enter');
   let html = `<div class="node-tag">${node.tag}</div><div class="node-text">${node.text}</div>`;
+
+  if(node.type === 'riddle'){
+    html += `<form id="rpg-riddle"><label for="riddle-answer">${node.riddle.prompt}</label><input id="riddle-answer" maxlength="80" autocomplete="off" required><button class="rpg-btn">Conferir</button><details><summary>Preciso de uma pista</summary><p>${node.riddle.hint}</p></details><p id="riddle-feedback" role="status"></p></form>`;
+    panel.innerHTML=html;
+    document.getElementById('rpg-riddle').onsubmit=e=>{e.preventDefault();const norm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/gi,'').toLowerCase();if(norm(document.getElementById('riddle-answer').value)===norm(node.riddle.answer)){state.node=node.riddle.next;renderAll()}else document.getElementById('riddle-feedback').textContent='Ainda não encaixa. Confiram a inscrição e tentem novamente.'};
+    return;
+  }
 
   if(node.type === 'check'){
     html += `

@@ -1,0 +1,26 @@
+/* Nomes e apelidos usados no Brasil. Cada grupo tem ao menos cinco opções. */
+(function(root){const groups=[
+['bob','Bob Esponja',[['Bob Esponja','SpongeBob','SpongeBob SquarePants'],['Patrick','Patrick Estrela'],['Lula Molusco','Squidward'],['Sandy','Sandy Bochechas'],['Seu Siriguejo','Sr Siriguejo','Senhor Siriguejo','Mr Krabs']]],
+['ben','Ben 10',[['Ben Tennyson','Ben','Ben 10'],['Gwen Tennyson','Gwen'],['Vovô Max','Max','Max Tennyson'],['Chama','Heatblast'],['Quatro Braços','Quatro Bracos','Four Arms']]],
+['tom','Tom e Jerry',[['Tom','Tom Cat'],['Jerry','Jerry Mouse'],['Spike'],['Tyke'],['Tuffy','Nibbles']]],
+['simpsons','Os Simpsons',[['Homer Simpson','Homer'],['Marge Simpson','Marge'],['Bart Simpson','Bart'],['Lisa Simpson','Lisa'],['Maggie Simpson','Maggie']]],
+['scooby','Scooby-Doo',[['Scooby-Doo','Scooby'],['Salsicha','Shaggy'],['Fred','Fred Jones'],['Daphne','Daphne Blake'],['Velma','Velma Dinkley']]],
+['pica','Pica-Pau',[['Pica-Pau','Woody Woodpecker'],['Winnie','Winnie Pica-Pau'],['Leôncio','Leoncio'],['Zeca Urubu','Zeca'],['Zé Jacaré','Ze Jacare']]],
+['aventura','Hora de Aventura',[['Finn','Finn o Humano'],['Jake','Jake o Cão'],['Princesa Jujuba','Jujuba','Princess Bubblegum'],['Marceline'],['Rei Gelado','Ice King']]],
+['gumball','O Incrível Mundo de Gumball',[['Gumball','Gumball Watterson'],['Darwin','Darwin Watterson'],['Anais','Anais Watterson'],['Nicole','Nicole Watterson'],['Ricardo Watterson','Ricardo','Richard','Richard Watterson']]],
+['show','Apenas um Show',[['Mordecai'],['Rigby'],['Benson'],['Saltitão','Saltitao','Skips'],['Musculoso','Muscle Man']]],
+['padrinhos','Os Padrinhos Mágicos',[['Timmy Turner','Timmy'],['Cosmo'],['Wanda'],['Vicky','Vicki'],['Sr. Crocker','Crocker','Denzel Crocker']]],
+['meninas','As Meninas Superpoderosas',[['Florzinha','Blossom'],['Lindinha','Bubbles'],['Docinho','Buttercup'],['Macaco Louco','Mojo Jojo'],['Professor Utônio','Professor Utonio','Utonio','Professor Utonium']]],
+['titas','Jovens Titãs em Ação!',[['Robin'],['Estelar','Starfire'],['Ravena','Raven'],['Mutano','Beast Boy'],['Ciborgue','Cyborg']]],
+['steven','Steven Universo',[['Steven','Steven Universo','Steven Universe'],['Garnet'],['Ametista','Amethyst'],['Pérola','Perola','Pearl'],['Connie','Connie Maheswaran']]],
+['phineas','Phineas e Ferb',[['Phineas','Phineas Flynn'],['Ferb','Ferb Fletcher'],['Candace','Candace Flynn'],['Perry','Perry o Ornitorrinco','Agente P'],['Dr. Doofenshmirtz','Doofenshmirtz','Heinz Doofenshmirtz']]],
+['looney','Looney Tunes',[['Pernalonga','Bugs Bunny'],['Patolino','Daffy Duck'],['Piu-Piu','Tweety'],['Frajola','Sylvester'],['Taz','Diabo da Tasmânia','Tasmanian Devil']]],
+['flintstones','Os Flintstones',[['Fred Flintstone','Fred'],['Wilma Flintstone','Wilma'],['Barney Rubble','Barney'],['Betty Rubble','Betty'],['Pedrita','Pebbles','Pebbles Flintstone']]],
+['popeye','Popeye',[['Popeye'],['Olívia Palito','Olivia Palito','Olivia','Olive Oyl'],['Brutus','Bluto'],['Dudu','Wimpy'],['Gugu','Swee Pea','SweePea']]],
+['peppa','Peppa Pig',[['Peppa Pig','Peppa'],['George Pig','George'],['Mamãe Pig','Mamae Pig','Mummy Pig'],['Papai Pig','Daddy Pig'],['Suzy Ovelha','Suzy','Suzy Sheep']]],
+['jorel','Irmão do Jorel',[['Irmão do Jorel','Irmao do Jorel'],['Jorel'],['Lara'],['Vovó Juju','Vovo Juju','Juju'],['Steve Magal']]],
+['monica','Turma da Mônica',[['Mônica','Monica'],['Cebolinha'],['Cascão','Cascao'],['Magali'],['Chico Bento','Chico']]],
+['coragem','Coragem, o Cão Covarde',[['Coragem','Courage'],['Muriel','Muriel Bagge'],['Eustácio','Eustacio','Eustace','Eustace Bagge'],['Katz'],['Le Quack','LeQuack']]],
+['dexter','O Laboratório de Dexter',[['Dexter'],['Dee Dee','DeeDee'],['Mandark'],['Mãe do Dexter','Mae do Dexter','Mamae do Dexter','Mom'],['Pai do Dexter','Papai do Dexter','Dad']]],
+['mickey','Mickey e sua turma · bônus',[['Mickey Mouse','Mickey'],['Minnie Mouse','Minnie'],['Pato Donald','Donald','Donald Duck'],['Pateta','Goofy'],['Pluto']]]
+].map(([id,name,characters])=>({id,name,characters:characters.map(([name,...aliases],i)=>({id:id+'-'+i,name,aliases,group:id}))}));if(typeof module!=='undefined')module.exports=groups;else root.BlindCharacters=groups;})(globalThis);
