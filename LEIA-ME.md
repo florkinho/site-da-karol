@@ -2,7 +2,7 @@
 
 ## Prévia no Desenho às cegas (DESCREVA)
 
-Antes de começar a rodada, só quem descreve vê o nome e a imagem do personagem. O botão “Memorizei. Esconder nome e imagem” remove ambos antes de passar o aparelho. Os 90 segundos começam apenas no botão da próxima tela. Trocar de aba ou recarregar esconde novamente o segredo.
+Antes de começar a rodada, só quem descreve vê o nome e a imagem do personagem. O botão “Memorizei. Esconder nome e imagem” remove ambos antes de passar o aparelho. Os 90 segundos começam apenas no botão da próxima tela. Trocar de aba ou recarregar esconde novamente o segredo. Depois de conferir o palpite e revelar a resposta, o resultado mostra o desenho feito e a imagem de referência juntos para comparar.
 
 As 115 referências ficam em `assets/blind/`, com os caminhos e as fontes em `blind-references.js`. Atualize essa pasta junto de `blind.js`, `blind.css`, `blind-references.js` e `desenho-as-cegas.html`. As imagens são referências de personagens de seus respectivos criadores e titulares; cada prévia inclui um link para a fonte consultada. O jogo não depende de uma API externa para mostrar as imagens. Se uma imagem falhar, uma mensagem permite continuar pelo nome.
 
